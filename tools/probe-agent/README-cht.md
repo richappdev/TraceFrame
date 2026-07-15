@@ -32,4 +32,6 @@
 ## 🛠️ 執行指南 (For Running Agent)
 1. 配置你的 Python 環境，確保安裝 `aiohttp`。
 2. 配置代理池（若無代理，腳本將回退至單一 IP 安全降頻模式）。
-3. 執行 `probe_agent.py`，它將會把獲取的有效數據自動輸出為 `valid_anitabi_ids.csv`。
+3. 在本目錄執行：
+   `python probe_agent.py`
+   有效 ID 會寫入當前工作目錄的 `valid_anitabi_ids.csv`。

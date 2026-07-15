@@ -1,19 +1,34 @@
 const AUTH_BASE = "https://bgm.tv/oauth";
 const API_BASE = "https://api.bgm.tv";
 
+const DEFAULT_REDIRECT_URI = "http://localhost:3000/api/auth/callback";
+
+function envTrim(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
 export function getBangumiOAuthConfig() {
-  const clientId = process.env.BANGUMI_CLIENT_ID ?? "";
-  const clientSecret = process.env.BANGUMI_CLIENT_SECRET ?? "";
-  const redirectUri =
-    process.env.BANGUMI_REDIRECT_URI ?? "http://localhost:3000/api/auth/callback";
-  return { clientId, clientSecret, redirectUri, configured: Boolean(clientId && clientSecret) };
+  const clientId = envTrim("BANGUMI_CLIENT_ID");
+  const clientSecret = envTrim("BANGUMI_CLIENT_SECRET");
+  // Empty string must not win over the default (`??` only catches null/undefined).
+  const redirectUri = envTrim("BANGUMI_REDIRECT_URI") || DEFAULT_REDIRECT_URI;
+  return {
+    clientId,
+    clientSecret,
+    redirectUri,
+    configured: Boolean(clientId && clientSecret && redirectUri),
+  };
 }
 
 export function buildAuthorizeUrl(state: string): string {
   const { clientId, redirectUri } = getBangumiOAuthConfig();
+  if (!redirectUri) {
+    throw new Error("BANGUMI_REDIRECT_URI is required");
+  }
   const url = new URL(`${AUTH_BASE}/authorize`);
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("response_type", "code");
+  // Must match the callback URL saved on https://bgm.tv/dev/app
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("state", state);
   return url.toString();

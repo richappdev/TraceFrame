@@ -1,0 +1,27 @@
+{
+  "name": "antiable",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Bangumi library → Anitabi presence → city-day pilgrimage planner",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @antiable/web",
+    "build": "npm run build -w @antiable/web",
+    "lint": "npm run lint -w @antiable/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "smoke:clients": "tsx scripts/smoke-clients.ts",
+    "presence:import": "tsx scripts/import-presence.ts",
+    "presence:coverage": "tsx scripts/coverage-report.ts",
+    "e0": "npm run presence:import && npm run presence:coverage && npm run smoke:clients"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

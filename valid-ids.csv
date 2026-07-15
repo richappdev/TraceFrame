@@ -1,0 +1,3 @@
+id,cn,title,city,pointsLength,firstSeenAt,lastVerifiedAt,sourceRun,httpStatus,notes
+115908,吹响吧！上低音号,響け！ユーフォニアム,宇治市,577,2026-07-15T11:06:00,2026-07-15T11:06:00,manual-smoke-20260715,200,Confirmed via GET /bangumi/{id}/lite before regression floods
+126461,,,,53,2026-07-15T11:03:00,2026-07-15T11:03:00,manual-smoke-20260715,200,Confirmed via GET /bangumi/{id}/points/detail (API docs example); lite metadata not re-fetched after Cloudflare block

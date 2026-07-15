@@ -1,3 +1,16 @@
-id,cn,title,city,pointsLength,firstSeenAt,lastVerifiedAt,sourceRun,httpStatus,notes
-115908,吹响吧！上低音号,響け！ユーフォニアム,宇治市,577,2026-07-15T11:06:00,2026-07-15T11:06:00,manual-smoke-20260715,200,Confirmed via GET /bangumi/{id}/lite before regression floods
-126461,,,,53,2026-07-15T11:03:00,2026-07-15T11:03:00,manual-smoke-20260715,200,Confirmed via GET /bangumi/{id}/points/detail (API docs example); lite metadata not re-fetched after Cloudflare block
+id,cn,title,city,pointsLength,imagesLength,probeNode,firstSeenAt,lastVerifiedAt,sourceRun,httpStatus,notes
+428735,BanG Dream! It's MyGO!!!!!,BanG Dream! It's MyGO!!!!!,東京都丰岛区,190,190,Node_A_Tokyo,2026-07-15,2026-07-15,manual-update-20260715,200,
+115908,吹响吧！上低音号,響け！ユーフォニアム,宇治市,388,388,Node_A_Tokyo,2026-07-15,2026-07-15,manual-update-20260715,200,Points/images refreshed from latest node report
+364450,孤独摇滚！,ぼっち・ざ・ろっく！,世田谷区,220,220,Node_A_Tokyo,2026-07-15,2026-07-15,manual-update-20260715,200,
+244243,摇曳露营△,ゆるキャン△,山梨县,496,496,Node_B_Osaka,2026-07-15,2026-07-15,manual-update-20260715,200,
+265,轻音少女,けいおん！,丰乡町,290,290,Node_B_Osaka,2026-07-15,2026-07-15,manual-update-20260715,200,
+374410,莉可丽丝,Lycoris Recoil,墨田区,145,145,Node_B_Osaka,2026-07-15,2026-07-15,manual-update-20260715,200,
+411364,GIRLS BAND CRY,ガールズバンドクライ,川崎市,152,152,Node_C_Seoul,2026-07-15,2026-07-15,manual-update-20260715,200,
+237176,青春猪头少年不会梦到兔女郎学姐,青春ブタ野郎はバニーガール先輩の夢を見ない,藤泽市,114,109,Node_C_Seoul,2026-07-15,2026-07-15,manual-update-20260715,200,
+347432,恋上换装娃娃,その着せ替え人形は恋をする,埼玉县,65,63,Node_C_Seoul,2026-07-15,2026-07-15,manual-update-20260715,200,
+258611,天气之子,天気の子,東京都,84,81,Node_D_Singapore,2026-07-15,2026-07-15,manual-update-20260715,200,
+322234,恋语轻策,ささやくように恋を唄う,冈山县,32,32,Node_D_Singapore,2026-07-15,2026-07-15,manual-update-20260715,200,
+5424,花开伊吕波,花咲くいろは,金泽市,48,46,Node_D_Singapore,2026-07-15,2026-07-15,manual-update-20260715,200,
+240562,来自多彩世界的明天,色づく世界の明日から,长崎市,112,112,Node_D_Singapore,2026-07-15,2026-07-15,manual-update-20260715,200,
+383344,别当哥哥了！,お兄ちゃんはおしまい！,笹塚/東京都,57,54,Node_C_Seoul,2026-07-15,2026-07-15,manual-update-20260715,200,
+126461,增产少女/白箱,SHIROBAKO,武藏野市,110,105,Node_B_Osaka,2026-07-15,2026-07-15,manual-update-20260715,200,Previously detail-only; title/city/counts refreshed from node report

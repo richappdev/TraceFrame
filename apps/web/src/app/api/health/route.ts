@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 export function GET() {
   return NextResponse.json({
     ok: true,
-    service: "antiable-trip",
-    phase: "E0",
+    service: "traceframe",
+    phase: "E1",
     time: new Date().toISOString(),
   });
 }

@@ -4,15 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build && node ./scripts/prepare-standalone.mjs",
+    "apphosting:build": "next build && node ./scripts/prepare-standalone.mjs",
+    "start": "node .next/standalone/apps/web/server.js",
     "lint": "next lint",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "engines": {
+    "node": "22"
+  },
   "dependencies": {
-    "@antiable/anitabi": "*",
-    "@antiable/bangumi": "*",
-    "@antiable/presence": "*",
+    "@antiable/anitabi": "file:./vendor/anitabi",
+    "@antiable/bangumi": "file:./vendor/bangumi",
+    "@antiable/presence": "file:./vendor/presence",
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

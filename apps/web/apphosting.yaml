@@ -1,0 +1,45 @@
+# Settings for Cloud Run behind Firebase App Hosting
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+  minInstances: 0
+  maxInstances: 4
+  concurrency: 40
+
+# Standalone Next.js server.
+# Monorepo tracing emits apps/web/server.js; isolated app emits server.js at standalone root.
+scripts:
+  runCommand: node .next/standalone/apps/web/server.js
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: HOSTNAME
+    value: "0.0.0.0"
+    availability:
+      - RUNTIME
+  - variable: DATA_DIR
+    value: /tmp/antiable
+    availability:
+      - RUNTIME
+  - variable: BANGUMI_CLIENT_ID
+    secret: BANGUMI_CLIENT_ID
+    availability:
+      - RUNTIME
+  - variable: BANGUMI_CLIENT_SECRET
+    secret: BANGUMI_CLIENT_SECRET
+    availability:
+      - RUNTIME
+  - variable: SESSION_SECRET
+    secret: SESSION_SECRET
+    availability:
+      - RUNTIME
+  - variable: BANGUMI_REDIRECT_URI
+    secret: BANGUMI_REDIRECT_URI
+    availability:
+      - RUNTIME

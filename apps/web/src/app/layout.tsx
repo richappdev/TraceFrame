@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Antiable Trip",
+  title: "Traceframe",
   description: "Bangumi library → Anitabi presence → city-day pilgrimage planner",
 };
 
@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div className="shell">
           <header className="topbar">
             <a className="brand" href="/">
-              Antiable Trip
+              Traceframe
             </a>
             <nav className="nav">
               <a href="/presence">Presence</a>

@@ -1,0 +1,15 @@
+{
+  "apphosting": {
+    "backendId": "traceframe",
+    "rootDir": "apps/web",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      ".next",
+      "**/.env.local",
+      "**/.env.*.local"
+    ]
+  }
+}

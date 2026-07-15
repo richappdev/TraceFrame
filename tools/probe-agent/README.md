@@ -29,11 +29,61 @@ The objective is to scan and filter out valid animation IDs (based on Bangumi Su
 ### 4. HTTP Header Polymorphism
 * **The Solution**: For every single request, randomly rotate the `User-Agent` and `Accept-Encoding` header configurations to eliminate automated script fingerprints and make requests appear as native browser sessions.
 
+### 5. Smarter ID Seeding (Bangumi ranked)
+* **The Pain Point**: Blind random IDs in `1–500000` waste Anitabi quota on titles with no pilgrimage maps.
+* **The Solution**: Prefetch ranked anime subject IDs from Bangumi, then probe Anitabi only for:
+  1. Hardcoded known seeds
+  2. Bangumi ranked anime (`GET https://api.bgm.tv/v0/subjects?type=2&sort=rank`)
+  3. Neighborhood expansion (`±N` around each seed/ranked ID)
+* Bangumi calls use a fixed identifying UA (`antiable/probe-agent`). Anitabi calls keep polymorphic browser UAs.
+
 ---
 
-## 🛠️ Execution Guide (For Running Agents)
-1. Configure your Python environment and ensure that the `aiohttp` library is installed.
-2. Configure your proxy pool inside the script. *(Note: If no proxy is provided, the script will automatically fall back to a safe, low-frequency, single-IP scanning mode).*
-3. From this folder, run:
-   `python probe_agent.py`
-   Verified IDs are written to `valid_anitabi_ids.csv` in the current working directory.
+## Usage
+
+### Setup
+```bash
+cd tools/probe-agent
+py -3 -m pip install aiohttp
+```
+Optional: fill `PROXY_POOL` in `probe_agent.py`. With an empty/only-`None` pool, the agent uses local egress at a slower pace.
+
+### Common commands
+```bash
+# Default: Bangumi ranked (4×50) + seeds + ±3 neighborhood → Anitabi /lite
+py -3 probe_agent.py
+
+# Fetch ranked list only (no Anitabi traffic)
+py -3 probe_agent.py --seeds-only --dump-seeds bangumi_ranked_ids.txt
+
+# More ranked pages / wider neighborhood
+py -3 probe_agent.py --pages 8 --neighborhood 5 --output valid_anitabi_ids.csv
+
+# Local seeds only (skip Bangumi API)
+py -3 probe_agent.py --no-bangumi
+
+# Also include legacy 400000–400099 exploration band
+py -3 probe_agent.py --exploration
+```
+
+Verified hits are written to `valid_anitabi_ids.csv` (or `--output`).
+
+### CLI options
+
+| Flag | Default | Description |
+|---|---|---|
+| `--pages` | `4` | Bangumi ranked pages to fetch (`page_size` each; default ≈ 200 anime) |
+| `--page-size` | `50` | Bangumi page size (API max 50) |
+| `--sort` | `rank` | Bangumi browse sort: `rank` or `date` |
+| `--neighborhood` | `3` | Expand each seed/ranked ID by `±N` before probing |
+| `--no-bangumi` | off | Skip Bangumi; use hardcoded seeds (+ neighborhood) only |
+| `--exploration` | off | Also include IDs `400000–400099` |
+| `--dump-seeds` | — | Write Bangumi ranked IDs to a text file (one ID per line) |
+| `--seeds-only` | off | Build the candidate ID list and exit (no Anitabi requests) |
+| `--output` | `valid_anitabi_ids.csv` | CSV path for Anitabi hits |
+
+### Seed pipeline
+1. Hardcoded pilgrimage seeds in `SEED_SUBJECT_IDS`
+2. Bangumi ranked anime: `GET https://api.bgm.tv/v0/subjects?type=2&sort=rank`
+3. Neighborhood expansion around the merged set
+4. Anitabi lite probe: `GET https://api.anitabi.cn/bangumi/{id}/lite` (keep only `pointsLength > 0`)

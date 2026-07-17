@@ -33,8 +33,9 @@ Copy `apps/web/.env.example` → `apps/web/.env.local` and fill Bangumi OAuth cr
 | `/` | Landing |
 | `/presence` | Guest-friendly mapped titles (city filter via `?city=`) |
 | `/library` | Collection × presence join (after OAuth) |
+| `/trips` | Owner trip list |
 | `/trips/new` | Build 1–3 day city trip from mapped titles |
-| `/trips/:id` | Trip editor / owner view + share link |
+| `/trips/:id` | Trip editor (reorder + save) + share link |
 | `/t/:token` | Read-only shared trip |
 | `/api/health` | Deploy smoke |
 | `/api/presence` | Paginated presence JSON |
@@ -53,7 +54,8 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 - **E0 Foundations** — done (scaffold, clients, presence import, M0 coverage report)
 - **E1 Auth & library** — done in code (OAuth + library sync/join); set Bangumi credentials in `.env.local`
 - **E2 Discovery UX** — city chips filter `/presence`, attribution footer, unmapped FAQ
-- **E3 Day planner MVP** — trip CRUD + share token route (`/t/:token`)
+- **E3 Day planner MVP** — trip CRUD, owner list, reorder editor, share token (`/t/:token`)
+- **M2 gate** — see `docs/m2-acceptance.md` (manual + preview deploy)
 - **Firebase** — project `antiable-traceframe` (display: Traceframe); App Hosting config ready
 - E4+ — POI detail / export (see Notion)
 

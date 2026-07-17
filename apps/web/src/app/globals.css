@@ -253,6 +253,30 @@ main {
   font-size: 0.9rem;
 }
 
+.trip-day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.trip-day-head h3 {
+  margin: 0;
+}
+
+.reorder-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.btn-tiny {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
 .lib-list {
   list-style: none;
   padding: 0;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TripEditor } from "@/components/TripEditor";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
@@ -38,57 +39,5 @@ export default async function TripDetailPage({
     notFound();
   }
 
-  const view = hydrateTrip(trip);
-  const sharePath = view.shareToken ? `/t/${view.shareToken}` : null;
-
-  return (
-    <section>
-      <div className="hero" style={{ marginBottom: "1.5rem" }}>
-        <h1>{view.title}</h1>
-        <p>
-          {view.days.length} 天 · {view.subjectIds.length} 部作品 · 城市级草稿（M2）
-        </p>
-        <div className="cta-row">
-          <Link className="btn" href="/trips/new">
-            再规划一份
-          </Link>
-          <Link className="btn" href="/library">
-            Library
-          </Link>
-        </div>
-      </div>
-
-      {sharePath ? (
-        <div className="share-box">
-          只读分享：{" "}
-          <Link href={sharePath}>{sharePath}</Link>
-        </div>
-      ) : null}
-
-      {view.days.map((day) => (
-        <div key={day.day} className="trip-day">
-          <h3>
-            Day {day.day} · {day.city || "未标注城市"}
-          </h3>
-          <ul className="lib-list">
-            {day.titles.map((t) => (
-              <li key={t.subjectId} className="lib-item">
-                <div>
-                  <strong>{t.titleCn || t.title || `#${t.subjectId}`}</strong>
-                  <div className="meta">
-                    {t.city || "—"} · {t.pointsLength} points
-                  </div>
-                </div>
-                <div className="lib-actions">
-                  <a href={t.mapUrl} target="_blank" rel="noopener noreferrer">
-                    Anitabi 地图
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </section>
-  );
+  return <TripEditor trip={hydrateTrip(trip)} />;
 }

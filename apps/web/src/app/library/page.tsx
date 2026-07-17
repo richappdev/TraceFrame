@@ -78,6 +78,9 @@ export default async function LibraryPage({
           <a className="btn btn-primary" href="/trips/new">
             规划行程
           </a>
+          <a className="btn" href="/trips">
+            我的行程
+          </a>
           <a className="btn" href="/api/auth/logout">
             退出
           </a>

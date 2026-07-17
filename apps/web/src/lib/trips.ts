@@ -34,12 +34,27 @@ export function parseSubjectIds(json: string): number[] {
   }
 }
 
-export function hydrateTrip(trip: TripRow) {
+export type HydratedTitle = ReturnType<typeof presenceToPublic>;
+
+export type HydratedDay = TripDay & { titles: HydratedTitle[] };
+
+export type HydratedTrip = {
+  id: string;
+  ownerId: string;
+  title: string;
+  shareToken: string | null;
+  subjectIds: number[];
+  createdAt: string;
+  updatedAt: string;
+  days: HydratedDay[];
+};
+
+export function hydrateTrip(trip: TripRow): HydratedTrip {
   const days = parseTripDays(trip.daysJson);
   const subjectIds = parseSubjectIds(trip.subjectIdsJson);
   const presence = openPresenceStore();
   try {
-    const titles = new Map<number, ReturnType<typeof presenceToPublic>>();
+    const titles = new Map<number, HydratedTitle>();
     for (const id of subjectIds) {
       const row = presence.get(id);
       if (row) titles.set(id, presenceToPublic(row));

@@ -137,7 +137,13 @@ export class PresenceStore {
     return rows.map(rowToRecord);
   }
 
-  count(): number {
+  count(opts?: { city?: string }): number {
+    if (opts?.city) {
+      const row = this.db
+        .prepare(`SELECT COUNT(*) AS c FROM presence WHERE city = ?`)
+        .get(opts.city) as { c: number };
+      return Number(row.c);
+    }
     const row = this.db.prepare(`SELECT COUNT(*) AS c FROM presence`).get() as {
       c: number;
     };

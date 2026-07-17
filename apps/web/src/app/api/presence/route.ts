@@ -13,7 +13,8 @@ export function GET(request: Request) {
   try {
     const items = store.list({ limit, offset, city }).map(presenceToPublic);
     return NextResponse.json({
-      total: store.count(),
+      total: store.count(city ? { city } : undefined),
+      city: city ?? null,
       limit,
       offset,
       items,

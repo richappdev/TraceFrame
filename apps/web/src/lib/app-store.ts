@@ -24,6 +24,17 @@ export interface LibraryItemRow {
   updatedAt: string;
 }
 
+export interface TripRow {
+  id: string;
+  ownerId: string;
+  title: string;
+  shareToken: string | null;
+  daysJson: string;
+  subjectIdsJson: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
@@ -47,6 +58,20 @@ CREATE TABLE IF NOT EXISTS library_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_library_user ON library_items(user_id);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  share_token TEXT UNIQUE,
+  days_json TEXT NOT NULL,
+  subject_ids_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_trips_owner ON trips(owner_id);
+CREATE INDEX IF NOT EXISTS idx_trips_share ON trips(share_token);
 `;
 
 export class AppStore {
@@ -147,7 +172,95 @@ export class AppStore {
     }));
   }
 
+  createTrip(trip: TripRow): void {
+    this.db
+      .prepare(
+        `INSERT INTO trips (
+          id, owner_id, title, share_token, days_json, subject_ids_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        trip.id,
+        trip.ownerId,
+        trip.title,
+        trip.shareToken,
+        trip.daysJson,
+        trip.subjectIdsJson,
+        trip.createdAt,
+        trip.updatedAt,
+      );
+  }
+
+  getTrip(id: string): TripRow | null {
+    const row = this.db.prepare(`SELECT * FROM trips WHERE id = ?`).get(id) as
+      | Record<string, unknown>
+      | undefined;
+    return row ? tripFromRow(row) : null;
+  }
+
+  getTripByShareToken(token: string): TripRow | null {
+    const row = this.db
+      .prepare(`SELECT * FROM trips WHERE share_token = ?`)
+      .get(token) as Record<string, unknown> | undefined;
+    return row ? tripFromRow(row) : null;
+  }
+
+  listTrips(ownerId: string): TripRow[] {
+    const rows = this.db
+      .prepare(
+        `SELECT * FROM trips WHERE owner_id = ? ORDER BY updated_at DESC`,
+      )
+      .all(ownerId) as Array<Record<string, unknown>>;
+    return rows.map(tripFromRow);
+  }
+
+  updateTrip(
+    id: string,
+    patch: {
+      title?: string;
+      daysJson?: string;
+      subjectIdsJson?: string;
+      shareToken?: string | null;
+      updatedAt: string;
+    },
+  ): boolean {
+    const current = this.getTrip(id);
+    if (!current) return false;
+    this.db
+      .prepare(
+        `UPDATE trips SET
+          title = ?,
+          share_token = ?,
+          days_json = ?,
+          subject_ids_json = ?,
+          updated_at = ?
+         WHERE id = ?`,
+      )
+      .run(
+        patch.title ?? current.title,
+        patch.shareToken !== undefined ? patch.shareToken : current.shareToken,
+        patch.daysJson ?? current.daysJson,
+        patch.subjectIdsJson ?? current.subjectIdsJson,
+        patch.updatedAt,
+        id,
+      );
+    return true;
+  }
+
   close(): void {
     this.db.close();
   }
+}
+
+function tripFromRow(row: Record<string, unknown>): TripRow {
+  return {
+    id: String(row.id),
+    ownerId: String(row.owner_id),
+    title: String(row.title ?? ""),
+    shareToken: row.share_token == null ? null : String(row.share_token),
+    daysJson: String(row.days_json ?? "[]"),
+    subjectIdsJson: String(row.subject_ids_json ?? "[]"),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
 }

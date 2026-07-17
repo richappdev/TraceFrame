@@ -6,7 +6,7 @@ export function GET() {
   return NextResponse.json({
     ok: true,
     service: "traceframe",
-    phase: "E1",
+    phase: "E3",
     time: new Date().toISOString(),
   });
 }

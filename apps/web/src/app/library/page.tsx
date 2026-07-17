@@ -75,6 +75,9 @@ export default async function LibraryPage({
           <a className="btn" href={mappedOnly ? "/library" : "/library?mapped=1"}>
             {mappedOnly ? "显示全部" : "仅看已映射"}
           </a>
+          <a className="btn btn-primary" href="/trips/new">
+            规划行程
+          </a>
           <a className="btn" href="/api/auth/logout">
             退出
           </a>

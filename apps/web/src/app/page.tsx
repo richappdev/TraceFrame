@@ -13,6 +13,9 @@ export default function HomePage() {
         <a className="btn" href="/library">
           我的 Library
         </a>
+        <a className="btn" href="/trips/new">
+          规划行程
+        </a>
       </div>
     </section>
   );

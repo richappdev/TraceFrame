@@ -12,6 +12,7 @@
     "build": "npm run build -w @antiable/web",
     "lint": "npm run lint -w @antiable/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @antiable/web",
     "smoke:clients": "tsx scripts/smoke-clients.ts",
     "presence:import": "tsx scripts/import-presence.ts",
     "presence:coverage": "tsx scripts/coverage-report.ts",

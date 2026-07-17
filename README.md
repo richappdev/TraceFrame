@@ -23,6 +23,7 @@ npm install
 npm run presence:import
 npm run presence:coverage
 npm run smoke:clients
+npm run test
 npm run dev
 ```
 

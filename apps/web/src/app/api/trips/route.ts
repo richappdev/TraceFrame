@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { buildTripDays, clampDayCount } from "@/lib/planner";
 import { openPresenceStore } from "@/lib/presence";
+import { absoluteUrl } from "@/lib/request-origin";
 import { hydrateTrip } from "@/lib/trips";
 
 export const runtime = "nodejs";
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
     const input = await parseCreateInput(request);
     if (input.subjectIds.length === 0) {
       if (wantsHtml) {
-        return NextResponse.redirect(new URL("/trips/new?error=empty", request.url), 303);
+        return NextResponse.redirect(absoluteUrl(request, "/trips/new?error=empty"), 303);
       }
       return NextResponse.json({ error: "empty_selection" }, { status: 400 });
     }
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
 
     if (records.length === 0) {
       if (wantsHtml) {
-        return NextResponse.redirect(new URL("/trips/new?error=unmapped", request.url), 303);
+        return NextResponse.redirect(absoluteUrl(request, "/trips/new?error=unmapped"), 303);
       }
       return NextResponse.json({ error: "no_mapped_titles" }, { status: 400 });
     }
@@ -122,13 +123,13 @@ export async function POST(request: Request) {
     store.close();
 
     if (wantsHtml) {
-      return NextResponse.redirect(new URL(`/trips/${tripId}`, request.url), 303);
+      return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}`), 303);
     }
     return NextResponse.json({ ok: true, trip: hydrateTrip(created) }, { status: 201 });
   } catch (err) {
     console.error(err);
     if (wantsHtml) {
-      return NextResponse.redirect(new URL("/trips/new?error=failed", request.url), 303);
+      return NextResponse.redirect(absoluteUrl(request, "/trips/new?error=failed"), 303);
     }
     return NextResponse.json(
       { error: "create_failed", message: err instanceof Error ? err.message : String(err) },

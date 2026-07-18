@@ -1,0 +1,57 @@
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+
+export const OAUTH_STATE_COOKIE = "antiable_oauth_state";
+
+function stateSecret(): string {
+  return process.env.SESSION_SECRET ?? "dev-only-change-me-to-a-long-random-string";
+}
+
+export interface OAuthStatePayload {
+  /** CSRF nonce */
+  n: string;
+  /** Expiry epoch ms */
+  e: number;
+  /** redirect_uri used in authorize (must match token exchange) */
+  r: string;
+}
+
+/** Create CSRF state embedding redirect_uri: `payload.sig`. */
+export function createOAuthState(redirectUri: string, ttlMs = 10 * 60 * 1000): string {
+  const payload: OAuthStatePayload = {
+    n: randomBytes(16).toString("hex"),
+    e: Date.now() + ttlMs,
+    r: redirectUri,
+  };
+  const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const sig = createHmac("sha256", stateSecret()).update(body).digest("base64url");
+  return `${body}.${sig}`;
+}
+
+/** Verify signed state; returns payload or null if tampered/expired/malformed. */
+export function parseOAuthState(state: string | null | undefined): OAuthStatePayload | null {
+  if (!state) return null;
+  const dot = state.indexOf(".");
+  if (dot <= 0 || dot === state.length - 1) return null;
+  const body = state.slice(0, dot);
+  const sig = state.slice(dot + 1);
+  const expect = createHmac("sha256", stateSecret()).update(body).digest("base64url");
+  try {
+    const a = Buffer.from(sig);
+    const b = Buffer.from(expect);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  } catch {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as OAuthStatePayload;
+    if (!payload?.n || !payload?.r || !Number.isFinite(payload.e)) return null;
+    if (Date.now() > payload.e) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export function verifyOAuthState(state: string | null | undefined): boolean {
+  return parseOAuthState(state) != null;
+}

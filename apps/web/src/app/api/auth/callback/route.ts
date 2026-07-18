@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { exchangeCode, fetchBangumiMe, getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { openAppStore } from "@/lib/db";
+import { OAUTH_STATE_COOKIE, parseOAuthState } from "@/lib/oauth-state";
+import { absoluteUrl } from "@/lib/request-origin";
 import {
   COOKIE_NAME,
   encodeSessionCookie,
@@ -10,10 +13,14 @@ import {
 
 export const runtime = "nodejs";
 
+function redirectHome(request: Request, auth: string) {
+  return NextResponse.redirect(absoluteUrl(request, `/?auth=${auth}`));
+}
+
 export async function GET(request: Request) {
   const { configured } = getBangumiOAuthConfig();
   if (!configured) {
-    return NextResponse.redirect(new URL("/?auth=not_configured", request.url));
+    return redirectHome(request, "not_configured");
   }
 
   const url = new URL(request.url);
@@ -21,24 +28,23 @@ export async function GET(request: Request) {
   const state = url.searchParams.get("state");
   const err = url.searchParams.get("error");
   if (err) {
-    return NextResponse.redirect(new URL(`/?auth=error&reason=${err}`, request.url));
+    return redirectHome(request, `error&reason=${encodeURIComponent(err)}`);
   }
   if (!code || !state) {
-    return NextResponse.redirect(new URL("/?auth=missing_code", request.url));
+    return redirectHome(request, "missing_code");
   }
 
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const stateCookie = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("antiable_oauth_state="))
-    ?.split("=")[1];
-  if (!stateCookie || stateCookie !== state) {
-    return NextResponse.redirect(new URL("/?auth=bad_state", request.url));
+  const jar = await cookies();
+  const stateCookie = jar.get(OAUTH_STATE_COOKIE)?.value;
+  const payload = parseOAuthState(state);
+  const stateOk = Boolean(payload) && Boolean(stateCookie) && stateCookie === state;
+
+  if (!stateOk || !payload) {
+    return redirectHome(request, "bad_state");
   }
 
   try {
-    const token = await exchangeCode(code);
+    const token = await exchangeCode(code, payload.r);
     const me = await fetchBangumiMe(token.access_token);
     const userId = `bgm:${me.id}`;
     const accessTokenEnc = encryptToken(token.access_token);
@@ -72,13 +78,13 @@ export async function GET(request: Request) {
       tokenExpiresAt,
     });
 
-    const res = NextResponse.redirect(new URL("/library", request.url));
+    const res = NextResponse.redirect(absoluteUrl(request, "/library"));
     const opts = sessionCookieOptions();
     res.cookies.set(COOKIE_NAME, session, opts);
-    res.cookies.set("antiable_oauth_state", "", { path: "/", maxAge: 0 });
+    res.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
     return res;
   } catch (e) {
     console.error(e);
-    return NextResponse.redirect(new URL("/?auth=exchange_failed", request.url));
+    return redirectHome(request, "exchange_failed");
   }
 }

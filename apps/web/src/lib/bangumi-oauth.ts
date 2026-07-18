@@ -20,8 +20,9 @@ export function getBangumiOAuthConfig() {
   };
 }
 
-export function buildAuthorizeUrl(state: string): string {
-  const { clientId, redirectUri } = getBangumiOAuthConfig();
+export function buildAuthorizeUrl(state: string, redirectUriOverride?: string): string {
+  const { clientId, redirectUri: configured } = getBangumiOAuthConfig();
+  const redirectUri = redirectUriOverride || configured;
   if (!redirectUri) {
     throw new Error("BANGUMI_REDIRECT_URI is required");
   }
@@ -43,8 +44,12 @@ export interface TokenResponse {
   user_id: number;
 }
 
-export async function exchangeCode(code: string): Promise<TokenResponse> {
-  const { clientId, clientSecret, redirectUri } = getBangumiOAuthConfig();
+export async function exchangeCode(
+  code: string,
+  redirectUriOverride?: string,
+): Promise<TokenResponse> {
+  const { clientId, clientSecret, redirectUri: configured } = getBangumiOAuthConfig();
+  const redirectUri = redirectUriOverride || configured;
   const res = await fetch(`${AUTH_BASE}/access_token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },

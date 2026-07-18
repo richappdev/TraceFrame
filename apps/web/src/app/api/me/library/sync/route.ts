@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAccessToken, getSession } from "@/lib/auth";
 import { collectionTypeLabel, fetchUserCollections } from "@/lib/collections";
 import { openAppStore } from "@/lib/db";
+import { absoluteUrl } from "@/lib/request-origin";
 
 export const runtime = "nodejs";
 
@@ -45,18 +46,18 @@ export async function POST(request: Request) {
     const result = await syncLibrary();
     if (!result.ok) {
       if (wantsHtml) {
-        return NextResponse.redirect(new URL(`/?auth=${result.error}`, request.url), 303);
+        return NextResponse.redirect(absoluteUrl(request, `/?auth=${result.error}`), 303);
       }
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     if (wantsHtml) {
-      return NextResponse.redirect(new URL("/library?synced=1", request.url), 303);
+      return NextResponse.redirect(absoluteUrl(request, "/library?synced=1"), 303);
     }
     return NextResponse.json({ ok: true, synced: result.synced });
   } catch (err) {
     console.error(err);
     if (wantsHtml) {
-      return NextResponse.redirect(new URL("/library?sync=failed", request.url), 303);
+      return NextResponse.redirect(absoluteUrl(request, "/library?sync=failed"), 303);
     }
     return NextResponse.json(
       { error: "sync_failed", message: err instanceof Error ? err.message : String(err) },

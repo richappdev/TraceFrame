@@ -10,7 +10,7 @@ import { BangumiClient, defaultBangumiUserAgent } from "@antiable/bangumi";
 import { AnitabiClient, anitabiMapUrl } from "@antiable/anitabi";
 import { PresenceStore } from "@antiable/presence";
 
-const SEED_ID = 364450; // 孤独摇滚！
+const SEED_ID = 115908; // 吹响吧！上低音号 (Presence + Bangumi aligned)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dbPath = process.env.PRESENCE_DB ?? path.join(root, "data", "presence.sqlite");
 

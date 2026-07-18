@@ -21,6 +21,7 @@ Engineering plan: [Notion — Implementation plan](https://app.notion.com/p/Impl
 # Ensure system Node is on PATH (not Cursor's helper-only node)
 npm install
 npm run presence:import
+npm run presence:reconcile   # refresh seed vs live Anitabi + Bangumi
 npm run presence:coverage
 npm run smoke:clients
 npm run test

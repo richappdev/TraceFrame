@@ -97,6 +97,28 @@ export class BangumiClient {
     return subject;
   }
 
+  /**
+   * POST /v0/search/subjects — keyword search (anime by default).
+   * Used to recover Presence rows whose stored id/title pair was wrong.
+   */
+  async searchSubjects(
+    keyword: string,
+    opts?: { limit?: number; type?: number },
+  ): Promise<BangumiSubjectSummary[]> {
+    const q = keyword.trim();
+    if (!q) return [];
+    const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, opts?.limit ?? 5));
+    const type = opts?.type ?? SUBJECT_TYPE_ANIME;
+    const url = `${this.baseUrl}/v0/search/subjects?limit=${limit}`;
+    const payload = await this.postJson<{ data?: BangumiSubjectSummary[] }>(url, {
+      keyword: q,
+      filter: { type: [type] },
+    });
+    const batch = payload.data ?? [];
+    for (const item of batch) this.cacheSubject(item);
+    return batch;
+  }
+
   clearSubjectCache(): void {
     this.subjectCache.clear();
   }
@@ -119,6 +141,25 @@ export class BangumiClient {
       const body = await res.text().catch(() => "");
       throw new Error(
         `Bangumi ${res.status} ${res.statusText} for ${url}: ${body.slice(0, 200)}`,
+      );
+    }
+    return (await res.json()) as T;
+  }
+
+  private async postJson<T>(url: string, body: unknown): Promise<T> {
+    const res = await this.fetchImpl(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": this.userAgent,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(
+        `Bangumi ${res.status} ${res.statusText} for ${url}: ${text.slice(0, 200)}`,
       );
     }
     return (await res.json()) as T;

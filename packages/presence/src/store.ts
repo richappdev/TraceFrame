@@ -113,6 +113,24 @@ export class PresenceStore {
     }
   }
 
+  /** Wipe and reload — used after Presence reconcile so stale wrong IDs disappear. */
+  replaceAll(records: PresenceRecord[]): number {
+    this.db.exec("BEGIN");
+    try {
+      this.db.exec("DELETE FROM presence");
+      for (const row of records) this.upsert(row);
+      this.db.exec("COMMIT");
+      return records.length;
+    } catch (err) {
+      this.db.exec("ROLLBACK");
+      throw err;
+    }
+  }
+
+  deleteSubject(subjectId: number): void {
+    this.db.prepare(`DELETE FROM presence WHERE subject_id = ?`).run(subjectId);
+  }
+
   get(subjectId: number): PresenceRecord | null {
     const row = this.db
       .prepare(`SELECT * FROM presence WHERE subject_id = ?`)

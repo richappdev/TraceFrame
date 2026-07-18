@@ -15,6 +15,8 @@
     "test": "npm run test -w @antiable/web",
     "smoke:clients": "tsx scripts/smoke-clients.ts",
     "presence:import": "tsx scripts/import-presence.ts",
+    "presence:import:replace": "tsx scripts/import-presence.ts --replace",
+    "presence:reconcile": "tsx scripts/reconcile-presence.ts",
     "presence:coverage": "tsx scripts/coverage-report.ts",
     "e0": "npm run presence:import && npm run presence:coverage && npm run smoke:clients"
   },

@@ -35,6 +35,7 @@ Machine-readable source of truth: [`valid-ids.csv`](./valid-ids.csv)
    - **Existing id** → update `lastVerifiedAt`, `pointsLength` / names if fresher, and set `sourceRun` to the latest run.
 4. Keep `id` unique (one row per Bangumi subject id).
 5. Do not invent rows from 403/blocked runs.
+6. **Reconcile before shipping:** `npm run presence:reconcile` re-probes Anitabi `/lite`, cross-checks Bangumi `/v0/subjects/{id}` (anime only), rewrites titles/city/points from live APIs, and recovers mistitled IDs via Bangumi search. Then `npm run presence:import:replace` (reconcile already replaces the local DB).
 
 ### Suggested merge (PowerShell)
 

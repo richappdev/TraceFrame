@@ -16,10 +16,13 @@ After library sync, unmatched Bangumi IDs are enqueued (cap 50 per sync). A back
 1. Create Secret Manager secret `PRESENCE_DRAIN_SECRET` (long random string) and grant the `anipin-web` service account access. `scripts/deploy-firebase-hosting.ps1` mounts it into Cloud Run.
 2. Create a Cloud Scheduler HTTP job every 1–5 minutes:
    - Method: `POST`
-   - URL: `https://<host>/api/internal/presence-drain`
+   - URL must be the **Cloud Run service URL** (Firebase Hosting rewrites strip `Authorization` / custom auth headers)
+     Example: `https://anipin-web-852169798731.asia-east1.run.app/api/internal/presence-drain?limit=5`
    - Header: `Authorization: Bearer <PRESENCE_DRAIN_SECRET>`
    - Optional query: `?limit=5` (max 20)
 3. Confirm a sync that produces 核對中 rows eventually becomes 已對應 or 未對應 after drain runs.
+
+Configured job: `projects/antiable-anipin/locations/asia-east1/jobs/presence-drain` (every 3 minutes, `Asia/Taipei`).
 
 Local/dev (`APP_STORE` unset): queue uses an in-process memory backend; call the drain endpoint with the same secret after setting `PRESENCE_DRAIN_SECRET` in `.env.local`.
 

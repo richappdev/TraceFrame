@@ -7,8 +7,8 @@ the visitor grants analytics consent in the site prompt.
 ## Configure
 
 In Firebase Console, enable Google Analytics and register or select the web app on project
-`antiable-traceframe`. Product branding is AniPins; the Firebase project id stays
-`antiable-traceframe`.
+`antiable-anipin`. Product branding is AniPins; the Firebase project id is
+`antiable-anipin`. Legacy project `antiable-traceframe` runtime has been retired.
 Copy its public SDK configuration into these build-time environment variables:
 
 ```text

@@ -1,5 +1,6 @@
-﻿{
+{
   "projects": {
-    "default": "antiable-traceframe"
+    "default": "antiable-anipin",
+    "anipin": "antiable-anipin"
   }
 }

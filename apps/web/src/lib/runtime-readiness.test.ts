@@ -24,7 +24,7 @@ function configureProduction() {
   process.env.BANGUMI_CLIENT_ID = "client";
   process.env.BANGUMI_CLIENT_SECRET = "secret";
   process.env.BANGUMI_REDIRECT_URI =
-    "https://antiable-traceframe.web.app/api/auth/callback";
+    "https://antiable-anipin.web.app/api/auth/callback";
 }
 
 describe("production readiness configuration", () => {

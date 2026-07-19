@@ -70,8 +70,8 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 - **E0–E3 implementation** — code complete; this is not a release claim.
 - **Presence inventory** — 14 reconciled IDs as of 2026-07-18; the older 15-ID coverage report is superseded.
 - **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md). Operator smoke checklist: [`docs/hosted-smoke.md`](docs/hosted-smoke.md).
-- **Firebase** — project `antiable-traceframe` (unchanged hosting/OAuth project; product display name: AniPins); Firebase Hosting fronts Cloud Run in `asia-east1`
-- **Canonical app/OAuth host** — `https://antiable-traceframe.web.app`; alternate App Hosting links redirect OAuth start to this host.
+- **Firebase** — project `antiable-anipin` (product display name: AniPin / AniPins); Firebase Hosting fronts Cloud Run in `asia-east1`
+- **Canonical app/OAuth host** — `https://antiable-anipin.web.app`
 - **Production data** — Firestore required; local SQLite is development-only.
 - **Automated preflight** — 46 unit tests plus lint, workspace typecheck, and production build pass as of 2026-07-19; hosted manual acceptance remains open.
 - **E4+** — blocked until M2 passes and rights/data gates are approved.
@@ -80,25 +80,25 @@ Planning records: [`docs/product-validation.md`](docs/product-validation.md) · 
 
 ## Deploy (Firebase Hosting + Cloud Run)
 
-The canonical production and OAuth URL is `https://antiable-traceframe.web.app`. The
-`firebaseapp.com` alias and the old App Hosting backend are operational/rollback surfaces,
-not alternate OAuth origins. Cloud Run and
-Firestore require the **Blaze** plan on project `antiable-traceframe`:
+The canonical production and OAuth URL is `https://antiable-anipin.web.app`. The
+`firebaseapp.com` alias is not an OAuth origin. Cloud Run and
+Firestore require the **Blaze** plan on project `antiable-anipin`:
 
-https://console.firebase.google.com/project/antiable-traceframe/usage/details
+https://console.firebase.google.com/project/antiable-anipin/usage/details
 
 Create a Cloud Firestore database in the Firebase project before the first rollout. Production
 uses Firestore for durable users, libraries, and trips; local development continues to use SQLite.
 
 ```powershell
 # Build locally (optional preflight), then deploy Cloud Run followed by Hosting.
-docker build -t traceframe-web:local .
+docker build -t anipin-web:local .
 pwsh scripts/deploy-firebase-hosting.ps1
 ```
 
 Set the Bangumi **回调地址** and the `BANGUMI_REDIRECT_URI` Secret Manager value to:
 
-`https://antiable-traceframe.web.app/api/auth/callback`
+`https://antiable-anipin.web.app/api/auth/callback`
 
 See [`docs/firebase-hosting-migration.md`](docs/firebase-hosting-migration.md) for one-time
-IAM/secret setup, release verification, and App Hosting rollback details.
+IAM/secret setup and release verification. Legacy project `antiable-traceframe` App Hosting
+and Cloud Run have been retired; the GCP project is retained only for audit/export.

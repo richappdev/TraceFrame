@@ -22,7 +22,7 @@ function configure() {
   process.env.BANGUMI_CLIENT_ID = "client";
   process.env.BANGUMI_CLIENT_SECRET = "secret";
   process.env.BANGUMI_REDIRECT_URI =
-    "https://antiable-traceframe.web.app/api/auth/callback";
+    "https://antiable-anipin.web.app/api/auth/callback";
 }
 
 function request(host: string) {
@@ -38,20 +38,20 @@ function request(host: string) {
 describe("Bangumi OAuth canonical origin", () => {
   it("redirects alternate production hosts before setting OAuth state", () => {
     configure();
-    const response = GET(request("traceframe--antiable-traceframe.asia-east1.hosted.app"));
+    const response = GET(request("antiable-anipin.firebaseapp.com"));
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe(
-      "https://antiable-traceframe.web.app/api/auth/bangumi",
+      "https://antiable-anipin.web.app/api/auth/bangumi",
     );
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
   it("uses the configured callback on the canonical host", async () => {
     configure();
-    const response = GET(request("antiable-traceframe.web.app"));
+    const response = GET(request("antiable-anipin.web.app"));
     expect(response.status).toBe(200);
     expect(await response.text()).toContain(
-      "redirect_uri=https%3A%2F%2Fantiable-traceframe.web.app%2Fapi%2Fauth%2Fcallback",
+      "redirect_uri=https%3A%2F%2Fantiable-anipin.web.app%2Fapi%2Fauth%2Fcallback",
     );
     expect(response.headers.get("set-cookie")).toContain("__session=");
   });

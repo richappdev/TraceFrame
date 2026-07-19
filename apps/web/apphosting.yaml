@@ -1,6 +1,6 @@
-# Rollback settings for Cloud Run behind Firebase App Hosting.
-# OAuth remains canonical on https://antiable-traceframe.web.app; alternate
-# hosts redirect OAuth start there before setting the state cookie.
+# Historical App Hosting config (antiable-traceframe backend retired 2026-07-19).
+# Production is Firebase Hosting → Cloud Run `anipin-web` on project antiable-anipin.
+# Canonical OAuth host: https://antiable-anipin.web.app
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:

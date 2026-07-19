@@ -10,7 +10,7 @@
 
 ## Deployment verification
 
-1. Enable Firestore in the `antiable-traceframe` project and confirm the `traceframe-web` Cloud Run service account has least-privilege access.
+1. Enable Firestore in the `antiable-anipin` project and confirm the `anipin-web` Cloud Run service account has least-privilege access.
 2. Create a trip, copy its share URL, redeploy, and verify both owner and anonymous reads.
 3. Rotate then revoke the share token and verify old URLs fail.
 4. Delete the test user through `/privacy`; verify user, library subcollection, trips, and public URLs are gone.

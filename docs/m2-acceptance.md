@@ -8,13 +8,13 @@ For a short unauthenticated reachability pass first, use [`hosted-smoke.md`](hos
 
 - [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured in Secret Manager and attached to Cloud Run.
 - [ ] Production startup validates `APP_STORE=firestore`, all OAuth variables, the canonical HTTPS callback, and a 32+ character session secret; `/api/health` also proves a Firestore read and returns 503 when not ready.
-- [ ] Firestore exists in the deployment project and the `traceframe-web` Cloud Run service account can read/write it.
+- [ ] Firestore exists in the deployment project and the `anipin-web` Cloud Run service account can read/write it.
 - [ ] A saved trip and public share link still work after a redeploy or instance restart.
 - [ ] Firestore export/restore ownership and schedule are recorded in `docs/firestore-operations.md`.
 
 ## 2. OAuth and session security
 
-- [ ] Bangumi callback exactly matches `https://antiable-traceframe.web.app/api/auth/callback`; OAuth starts on alternate/rollback hosts redirect to the canonical host before setting state.
+- [ ] Bangumi callback exactly matches `https://antiable-anipin.web.app/api/auth/callback`; OAuth starts only on the canonical host before setting state.
 - [ ] OAuth rejects missing, modified, expired, and replayed `state` values.
 - [ ] Session cookie is named `__session` (Firebase Hosting requirement), `httpOnly`, `Secure` in production, `SameSite=Lax`, signed with HMAC, and expires after 30 days.
 - [ ] Missing or weak production `SESSION_SECRET` prevents startup.

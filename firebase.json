@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "antiable-traceframe",
+    "site": "antiable-anipin",
     "public": "hosting-public",
     "ignore": [
       "firebase.json",
@@ -11,11 +11,17 @@
       {
         "source": "**",
         "run": {
-          "serviceId": "traceframe-web",
+          "serviceId": "anipin-web",
           "region": "asia-east1",
           "pinTag": true
         }
       }
     ]
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-east1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

@@ -1,6 +1,6 @@
 # Hosted smoke (canonical Firebase Hosting)
 
-Use this for a fast live check of `https://antiable-traceframe.web.app`.  
+Use this for a fast live check of `https://antiable-anipin.web.app`.  
 It is **not** a substitute for [`m2-acceptance.md`](m2-acceptance.md). Passing smoke does not flip M2 to PASS.
 
 ## A. Immediate reachability (unauthenticated)
@@ -8,13 +8,13 @@ It is **not** a substitute for [`m2-acceptance.md`](m2-acceptance.md). Passing s
 Open in order:
 
 ```text
-https://antiable-traceframe.web.app/api/health
-https://antiable-traceframe.web.app/
-https://antiable-traceframe.web.app/zh-TW
-https://antiable-traceframe.web.app/zh-CN
-https://antiable-traceframe.web.app/ja-JP
-https://antiable-traceframe.web.app/zh-TW/presence
-https://antiable-traceframe.web.app/zh-TW/trips/explore
+https://antiable-anipin.web.app/api/health
+https://antiable-anipin.web.app/
+https://antiable-anipin.web.app/zh-TW
+https://antiable-anipin.web.app/zh-CN
+https://antiable-anipin.web.app/ja-JP
+https://antiable-anipin.web.app/zh-TW/presence
+https://antiable-anipin.web.app/zh-TW/trips/explore
 ```
 
 ### `/api/health`

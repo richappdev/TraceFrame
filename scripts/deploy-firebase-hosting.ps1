@@ -3,10 +3,10 @@
 
 [CmdletBinding()]
 param(
-  [string]$Project = "antiable-traceframe",
+  [string]$Project = "antiable-anipin",
   [string]$Region = "asia-east1",
-  [string]$Service = "traceframe-web",
-  [string]$ServiceAccount = "traceframe-web@antiable-traceframe.iam.gserviceaccount.com"
+  [string]$Service = "anipin-web",
+  [string]$ServiceAccount = "anipin-web@antiable-anipin.iam.gserviceaccount.com"
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,6 +28,7 @@ gcloud run deploy $Service `
   --min 0 `
   --max 4 `
   --concurrency 40 `
+  --set-build-env-vars "NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCJ9hJbciDjqxqSR7EMnnqnYpfiahyHNO4,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=antiable-anipin.firebaseapp.com,NEXT_PUBLIC_FIREBASE_PROJECT_ID=antiable-anipin,NEXT_PUBLIC_FIREBASE_APP_ID=1:852169798731:web:eb95735b011d77ce36c9ce,NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-PMSD55TH5V" `
   --set-env-vars "NODE_ENV=production,APP_STORE=firestore,DATA_DIR=/tmp/antiable,HOSTNAME=0.0.0.0" `
   --set-secrets "BANGUMI_CLIENT_ID=BANGUMI_CLIENT_ID:latest,BANGUMI_CLIENT_SECRET=BANGUMI_CLIENT_SECRET:latest,BANGUMI_REDIRECT_URI=BANGUMI_REDIRECT_URI:latest,SESSION_SECRET=SESSION_SECRET:latest"
 
@@ -35,11 +36,11 @@ if ($LASTEXITCODE -ne 0) {
   throw "Cloud Run deployment failed; Firebase Hosting was not changed."
 }
 
-Write-Host "Publishing Firebase Hosting site antiable-traceframe ..."
+Write-Host "Publishing Firebase Hosting site antiable-anipin ..."
 npx -y firebase-tools@latest deploy --only hosting --project $Project
 
 if ($LASTEXITCODE -ne 0) {
   throw "Firebase Hosting deployment failed. Cloud Run remains available for retry."
 }
 
-Write-Host "Deployment complete: https://antiable-traceframe.web.app"
+Write-Host "Deployment complete: https://antiable-anipin.web.app"

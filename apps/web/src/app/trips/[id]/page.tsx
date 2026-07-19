@@ -11,10 +11,13 @@ export const dynamic = "force-dynamic";
 
 export default async function TripDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
 }) {
   const { id } = await params;
+  const { created } = await searchParams;
   const locale = await getLocale();
   const c = getCopy(locale);
   const session = await getSession();
@@ -43,5 +46,5 @@ export default async function TripDetailPage({
     notFound();
   }
 
-  return <TripEditor trip={hydrateTrip(trip)} locale={locale} />;
+  return <TripEditor trip={hydrateTrip(trip)} locale={locale} justCreated={created === "1"} />;
 }

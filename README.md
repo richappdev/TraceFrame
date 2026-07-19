@@ -31,6 +31,8 @@ npm run dev
 ```
 
 Copy `apps/web/.env.example` → `apps/web/.env.local` and fill Bangumi OAuth credentials for login.
+Firebase Analytics is optional and consent-gated; configuration and event reporting are documented
+in [`docs/analytics.md`](docs/analytics.md).
 
 | URL | Purpose |
 |---|---|

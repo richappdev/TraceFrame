@@ -68,6 +68,9 @@ main { width: 100%; max-width: 1120px; margin: 0 auto; padding: 64px 32px 96px; 
 .btn:hover { background: var(--surface); box-shadow: 0 6px 18px rgba(23,35,60,.08); transform: translateY(-1px); }
 .btn-primary { color: #fff; background: var(--coral); border-color: var(--coral); box-shadow: 0 8px 22px rgba(237,97,73,.22); }
 .btn-primary:hover { color: #fff; background: var(--coral-dark); border-color: var(--coral-dark); }
+.analytics-consent { position: fixed; z-index: 50; right: 24px; bottom: 24px; width: min(430px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-left: 4px solid var(--coral); background: var(--surface); box-shadow: var(--shadow); }
+.analytics-consent p { margin: 0 0 14px; color: var(--ink-soft); font-size: .86rem; line-height: 1.65; }
+.analytics-consent .btn { min-height: 38px; font-size: .78rem; }
 .btn-quiet { border-color: transparent; background: transparent; }
 .hero-proof { display: flex; gap: 25px; margin-top: 36px; color: var(--ink-soft); font-size: .72rem; }
 .hero-proof span { display: grid; gap: 3px; }

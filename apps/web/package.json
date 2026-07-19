@@ -19,6 +19,7 @@
     "@antiable/anitabi": "file:./vendor/anitabi",
     "@antiable/bangumi": "file:./vendor/bangumi",
     "@antiable/presence": "file:./vendor/presence",
+    "firebase": "^12.7.0",
     "firebase-admin": "^14.2.0",
     "next": "^15.3.3",
     "react": "^19.1.0",

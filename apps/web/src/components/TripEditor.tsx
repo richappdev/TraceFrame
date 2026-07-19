@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { trackEvent } from "@/lib/analytics";
 import {
   moveTitle,
   swapDays,
@@ -10,7 +11,15 @@ import {
 import type { HydratedTrip } from "@/lib/trips";
 import { getCopy, localePath, localizedTitle, localizeCity, type Locale } from "@/lib/i18n";
 
-export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Locale }) {
+export function TripEditor({
+  trip,
+  locale,
+  justCreated = false,
+}: {
+  trip: HydratedTrip;
+  locale: Locale;
+  justCreated?: boolean;
+}) {
   const c = getCopy(locale);
   const [title, setTitle] = useState(trip.title);
   const [days, setDays] = useState<EditableDay[]>(trip.days);
@@ -18,6 +27,25 @@ export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Local
   const [status, setStatus] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const sharePath = shareToken ? localePath(locale, `/t/${shareToken}`) : null;
+
+  useEffect(() => {
+    trackEvent("trip_view", {
+      trip_id: trip.id,
+      view_type: "owner",
+      duration_days: trip.days.length,
+      subject_count: trip.subjectIds.length,
+    });
+    if (justCreated) {
+      trackEvent("trip_saved", {
+        trip_id: trip.id,
+        duration_days: trip.days.length,
+        subject_count: trip.subjectIds.length,
+      });
+      const url = new URL(window.location.href);
+      url.searchParams.delete("created");
+      window.history.replaceState(window.history.state, "", url);
+    }
+  }, [justCreated, trip.days.length, trip.id, trip.subjectIds.length]);
 
   function updateShare(shareAction: "rotate" | "revoke") {
     startTransition(async () => {
@@ -38,6 +66,9 @@ export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Local
         }
         setShareToken(body.trip.shareToken);
         setStatus(shareAction === "revoke" ? c.editor.revoked : c.editor.generated);
+        if (shareAction === "rotate") {
+          trackEvent("trip_shared", { trip_id: trip.id, share_action: "link_created" });
+        }
       } catch {
         setStatus(c.editor.network);
       }
@@ -69,6 +100,11 @@ export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Local
         setTitle(body.trip.title);
         setDays(body.trip.days);
         setStatus(c.editor.saved);
+        trackEvent("trip_saved", {
+          trip_id: trip.id,
+          duration_days: body.trip.days.length,
+          subject_count: body.trip.subjectIds.length,
+        });
       } catch {
         setStatus(c.editor.network);
       }
@@ -90,7 +126,12 @@ export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Local
             {c.editor.another}
           </Link>
           {sharePath ? (
-            <Link className="btn" href={sharePath} target="_blank">
+            <Link
+              className="btn"
+              href={sharePath}
+              target="_blank"
+              onClick={() => trackEvent("trip_shared", { trip_id: trip.id, share_action: "open_link" })}
+            >
               {c.editor.openShare}
             </Link>
           ) : null}
@@ -238,7 +279,16 @@ export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Local
                       ↓
                     </button>
                   </div>
-                  <a href={t.mapUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={t.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent("anitabi_map_click", {
+                      trip_id: trip.id,
+                      subject_id: String(t.subjectId),
+                      source: "trip_editor",
+                    })}
+                  >
                     {c.common.map}
                   </a>
                 </div>

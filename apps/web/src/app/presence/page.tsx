@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnalyticsLink } from "@/components/AnalyticsEvent";
 import { openPresenceStore, presenceToPublic } from "@/lib/presence";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
@@ -66,9 +67,15 @@ export default async function PresencePage({
               </div>
               <div className="lib-actions">
                 <span className="badge mapped">{c.common.mapped}</span>
-                <a href={item.mapUrl} target="_blank" rel="noopener noreferrer">
+                <AnalyticsLink
+                  href={item.mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  eventName="anitabi_map_click"
+                  eventParameters={{ subject_id: String(item.subjectId), source: "presence" }}
+                >
                   {c.common.map}
-                </a>
+                </AnalyticsLink>
               </div>
             </li>
           ))}

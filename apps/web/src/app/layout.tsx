@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { AnalyticsConsent } from "@/components/AnalyticsConsent";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
@@ -63,6 +64,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <p className="footer-code">TF / 2026</p>
             </div>
           </footer>
+          <AnalyticsConsent locale={locale} />
         </div>
       </body>
     </html>

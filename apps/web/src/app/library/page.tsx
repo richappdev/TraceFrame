@@ -1,5 +1,6 @@
 import { anitabiMapUrl } from "@antiable/anitabi";
 import Link from "next/link";
+import { AnalyticsLink } from "@/components/AnalyticsEvent";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
@@ -112,9 +113,15 @@ export default async function LibraryPage({
                   <span className="badge">{c.common.unmapped}</span>
                 )}
                 {item.mapUrl ? (
-                  <a href={item.mapUrl} target="_blank" rel="noopener noreferrer">
+                  <AnalyticsLink
+                    href={item.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    eventName="anitabi_map_click"
+                    eventParameters={{ subject_id: String(item.subjectId), source: "library" }}
+                  >
                     {c.common.map}
-                  </a>
+                  </AnalyticsLink>
                 ) : null}
               </div>
             </li>

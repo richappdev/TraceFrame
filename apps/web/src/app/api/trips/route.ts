@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     await store.close();
 
     if (wantsHtml) {
-      return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}`), 303);
+      return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}?created=1`), 303);
     }
     return NextResponse.json({ ok: true, trip: hydrateTrip(created) }, { status: 201 });
   } catch (err) {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AnalyticsEvent, AnalyticsLink } from "@/components/AnalyticsEvent";
 import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
@@ -24,6 +25,15 @@ export default async function SharedTripPage({
 
   return (
     <section>
+      <AnalyticsEvent
+        name="trip_view"
+        parameters={{
+          trip_id: view.id,
+          view_type: "shared",
+          duration_days: view.days.length,
+          subject_count: view.subjectIds.length,
+        }}
+      />
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
         <h1>{view.title}</h1>
         <p>
@@ -54,9 +64,19 @@ export default async function SharedTripPage({
                   </div>
                 </div>
                 <div className="lib-actions">
-                  <a href={t.mapUrl} target="_blank" rel="noopener noreferrer">
+                  <AnalyticsLink
+                    href={t.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    eventName="anitabi_map_click"
+                    eventParameters={{
+                      trip_id: view.id,
+                      subject_id: String(t.subjectId),
+                      source: "shared_trip",
+                    }}
+                  >
                     {c.common.map}
-                  </a>
+                  </AnalyticsLink>
                 </div>
               </li>
             ))}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedTripForm } from "@/components/AnalyticsEvent";
 import { getSession } from "@/lib/auth";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { openAppStore } from "@/lib/db";
@@ -90,7 +91,7 @@ export default async function NewTripPage({
           {c.newTrip.noPicks} <Link href={localePath(locale, "/library")}>Library</Link>
         </p>
       ) : (
-        <form className="trip-form" action="/api/trips" method="post">
+        <TrackedTripForm>
           {usingFallback ? (
             <p className="empty">
               {c.newTrip.fallback}
@@ -138,7 +139,7 @@ export default async function NewTripPage({
               {c.newTrip.back}
             </Link>
           </div>
-        </form>
+        </TrackedTripForm>
       )}
     </section>
   );

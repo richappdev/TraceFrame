@@ -1,10 +1,32 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { IBM_Plex_Mono, Source_Sans_3, Syne } from "next/font/google";
 import { AnalyticsConsent } from "@/components/AnalyticsConsent";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
 import "./globals.css";
+
+const fontDisplay = Syne({
+  subsets: ["latin"],
+  variable: "--font-display-loaded",
+  display: "swap",
+  weight: ["600", "700", "800"],
+});
+
+const fontBody = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-body-loaded",
+  display: "swap",
+  weight: ["400", "600", "700"],
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-loaded",
+  display: "swap",
+  weight: ["500", "600", "700"],
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -26,7 +48,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = await getLocale();
   const c = getCopy(locale).site;
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`}>
       <body>
         <div className="shell">
           <header className="topbar">

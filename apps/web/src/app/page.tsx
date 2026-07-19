@@ -33,8 +33,10 @@ export default async function HomePage({
         </aside>
       ) : null}
       <section className="home-hero">
+        <div className="hero-wash" aria-hidden="true" />
         <div className="hero-copy">
-          <p className="eyebrow"><span>ANIME PILGRIMAGE PLANNER</span><span>{c.home.eyebrow}</span></p>
+          <p className="eyebrow"><span>{c.home.eyebrow}</span></p>
+          <p className="hero-brand">TRACEFRAME</p>
           <h1>
             {c.home.title1}
             <span>{c.home.title2}</span>
@@ -49,11 +51,6 @@ export default async function HomePage({
             <Link className="btn btn-quiet" href={localePath(locale, "/presence")}>
               {c.home.browse}
             </Link>
-          </div>
-          <div className="hero-proof">
-            <span><strong>1–3</strong> {c.home.feature1}</span>
-            <span><strong>City-first</strong> {c.home.feature2}</span>
-            <span><strong>Read-only</strong> {c.home.feature3}</span>
           </div>
         </div>
 
@@ -100,15 +97,17 @@ export default async function HomePage({
           </div>
           <p>{c.home.stepIntro}</p>
         </div>
-        <div className="step-grid">
+        <ol className="step-list">
           {c.home.steps.map((step, index) => (
-            <article className="step-card" key={index}>
+            <li className="step-row" key={index}>
               <span className="step-number">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{step[0]}</h3>
-              <p>{step[1]}</p>
-            </article>
+              <div>
+                <h3>{step[0]}</h3>
+                <p>{step[1]}</p>
+              </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
 
       <section className="explore-banner">

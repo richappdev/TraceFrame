@@ -42,6 +42,14 @@ foreach ($secret in $secrets) {
 The deploying user also needs permission to build from source, deploy Cloud Run, act as
 the runtime service account, and deploy Firebase Hosting.
 
+## Cookies (required)
+
+Firebase Hosting strips every incoming cookie except `__session` before the
+request reaches Cloud Run. The app therefore stores both the short-lived OAuth
+CSRF state and the logged-in session in `__session` (never `antiable_session` /
+`antiable_oauth_state`). Auth responses that set this cookie use
+`Cache-Control: private`.
+
 ## OAuth cutover
 
 Register this callback in the Bangumi application:

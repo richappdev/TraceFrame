@@ -1,7 +1,11 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getSessionSecret } from "./session";
 
-export const OAUTH_STATE_COOKIE = "antiable_oauth_state";
+/**
+ * OAuth CSRF state is stored in the same `__session` cookie Firebase Hosting
+ * allows through to Cloud Run. It is replaced by the real session after callback.
+ */
+export { COOKIE_NAME as OAUTH_STATE_COOKIE } from "./session";
 
 export interface OAuthStatePayload {
   /** CSRF nonce */

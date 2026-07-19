@@ -7,7 +7,12 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
-const COOKIE_NAME = "antiable_session";
+/**
+ * Firebase Hosting → Cloud Run only forwards a cookie named `__session`
+ * (all other Cookie headers are stripped). Keep this name exactly.
+ * @see https://firebase.google.com/docs/hosting/manage-cache#using_cookies
+ */
+const COOKIE_NAME = "__session";
 
 export interface SessionUser {
   id: string;

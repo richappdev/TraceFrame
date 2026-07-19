@@ -17,9 +17,16 @@ function redirectHome(request: Request, auth: string) {
   return NextResponse.redirect(absoluteUrl(request, `/?auth=${auth}`));
 }
 
+function clearSessionCookie(res: NextResponse) {
+  res.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
+  // Legacy names from before the Firebase Hosting `__session` cutover.
+  res.cookies.set("antiable_session", "", { path: "/", maxAge: 0 });
+  res.cookies.set("antiable_oauth_state", "", { path: "/", maxAge: 0 });
+}
+
 function redirectFailure(request: Request, auth: string) {
   const res = redirectHome(request, auth);
-  res.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
+  clearSessionCookie(res);
   return res;
 }
 
@@ -115,8 +122,10 @@ export async function GET(request: Request) {
 
     const res = NextResponse.redirect(absoluteUrl(request, "/library"));
     const opts = sessionCookieOptions();
+    // Overwrites the temporary OAuth state value in `__session`.
     res.cookies.set(COOKIE_NAME, session, opts);
-    res.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
+    res.cookies.set("antiable_session", "", { path: "/", maxAge: 0 });
+    res.cookies.set("antiable_oauth_state", "", { path: "/", maxAge: 0 });
     return res;
   } catch (error) {
     console.error("OAuth session creation failed", error);

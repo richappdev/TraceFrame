@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  COOKIE_NAME,
   decodeSessionCookie,
   decryptToken,
   encodeSessionCookie,
@@ -18,6 +19,10 @@ afterEach(() => {
 });
 
 describe("session crypto", () => {
+  it("uses the Firebase Hosting __session cookie name", () => {
+    expect(COOKIE_NAME).toBe("__session");
+  });
+
   it("round-trips token encryption", () => {
     process.env.SESSION_SECRET = "unit-test-session-secret-32chars!!";
     const enc = encryptToken("access-token-value");

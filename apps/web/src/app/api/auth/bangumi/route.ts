@@ -18,6 +18,7 @@ function escapeHtmlAttr(value: string): string {
  * Return 200 HTML that navigates to Bangumi after Set-Cookie.
  * Set-Cookie on a 302 to a third party is flaky in some browsers (cookie never
  * stored → callback sees auth=bad_state).
+ * Cache-Control must stay private/no-store: Firebase Hosting keys CDN on `__session`.
  */
 function interstitialRedirect(authorizeUrl: string): NextResponse {
   const href = escapeHtmlAttr(authorizeUrl);
@@ -38,7 +39,7 @@ function interstitialRedirect(authorizeUrl: string): NextResponse {
     status: 200,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store",
+      "Cache-Control": "private, no-store",
     },
   });
 }

@@ -14,7 +14,7 @@ M2 is complete only when every required item is checked through the Firebase Hos
 
 - [ ] Bangumi callback exactly matches the hosted `/api/auth/callback` URL.
 - [ ] OAuth rejects missing, modified, expired, and replayed `state` values.
-- [ ] Session cookie is `httpOnly`, `Secure` in production, `SameSite=Lax`, signed with HMAC, and expires after 30 days.
+- [ ] Session cookie is named `__session` (Firebase Hosting requirement), `httpOnly`, `Secure` in production, `SameSite=Lax`, signed with HMAC, and expires after 30 days.
 - [ ] Missing or weak production `SESSION_SECRET` prevents startup.
 - [ ] Logout clears the session; expired Bangumi tokens produce a re-login path rather than exposing credentials.
 - [ ] Cross-site POST/PATCH/DELETE requests are rejected.

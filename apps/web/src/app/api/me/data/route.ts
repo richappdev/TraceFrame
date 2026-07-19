@@ -31,6 +31,8 @@ async function removeData(request: Request) {
     ? NextResponse.redirect(absoluteUrl(request, "/?data=deleted"), 303)
     : NextResponse.json({ ok: true });
   response.cookies.set(COOKIE_NAME, "", { ...sessionCookieOptions(0), maxAge: 0 });
+  response.cookies.set("antiable_session", "", { path: "/", maxAge: 0 });
+  response.cookies.set("antiable_oauth_state", "", { path: "/", maxAge: 0 });
   return response;
 }
 

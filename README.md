@@ -58,39 +58,32 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 - **E0–E3 implementation** — code complete; this is not a release claim.
 - **Presence inventory** — 14 reconciled IDs as of 2026-07-18; the older 15-ID coverage report is superseded.
 - **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md).
-- **Firebase** — project `antiable-traceframe` (display: Traceframe); App Hosting config ready
+- **Firebase** — project `antiable-traceframe` (display: Traceframe); Firebase Hosting fronts Cloud Run in `asia-east1`
 - **Production data** — Firestore required; local SQLite is development-only.
 - **E4+** — blocked until M2 passes and rights/data gates are approved.
 
 Planning records: [`docs/product-validation.md`](docs/product-validation.md) · [`docs/firestore-operations.md`](docs/firestore-operations.md) · [`docs/data-rights-matrix.md`](docs/data-rights-matrix.md)
 
-## Deploy (Firebase App Hosting)
+## Deploy (Firebase Hosting + Cloud Run)
 
-App Hosting requires the **Blaze** plan on project `antiable-traceframe`:
+The production URL is `https://antiable-traceframe.web.app` (with
+`https://antiable-traceframe.firebaseapp.com` as an equivalent alias). Cloud Run and
+Firestore require the **Blaze** plan on project `antiable-traceframe`:
 
 https://console.firebase.google.com/project/antiable-traceframe/usage/details
 
 Create a Cloud Firestore database in the Firebase project before the first rollout. Production
 uses Firestore for durable users, libraries, and trips; local development continues to use SQLite.
 
-```bash
-# 1. Create backend (once, after Blaze)
-npx -y firebase-tools@latest apphosting:backends:create \
-  --project antiable-traceframe \
-  --backend traceframe \
-  --primary-region asia-east1 \
-  --root-dir apps/web \
-  --app 1:39985878012:web:22397139bcd156af86d879
-
-# 2. Push secrets from apps/web/.env.local
-pwsh scripts/set-apphosting-secrets.ps1
-
-# 3. Deploy
-npx -y firebase-tools@latest deploy --only apphosting --project antiable-traceframe
+```powershell
+# Build locally (optional preflight), then deploy Cloud Run followed by Hosting.
+docker build -t traceframe-web:local .
+pwsh scripts/deploy-firebase-hosting.ps1
 ```
 
-After the first deploy, set Bangumi **回调地址** and `BANGUMI_REDIRECT_URI` to:
+Set the Bangumi **回调地址** and the `BANGUMI_REDIRECT_URI` Secret Manager value to:
 
-`https://<your-hosted-url>/api/auth/callback`
+`https://antiable-traceframe.web.app/api/auth/callback`
 
-then re-run the secrets script and redeploy.
+See [`docs/firebase-hosting-migration.md`](docs/firebase-hosting-migration.md) for one-time
+IAM/secret setup, release verification, and App Hosting rollback details.

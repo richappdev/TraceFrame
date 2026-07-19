@@ -1,12 +1,12 @@
 # M2 release gate — shareable trip
 
-M2 is complete only when every required item is checked on a Firebase App Hosting preview. “Implemented” is not “released.” Record the preview URL, tester, date, and evidence links at the bottom.
+M2 is complete only when every required item is checked through the Firebase Hosting URL backed by Cloud Run. “Implemented” is not “released.” Record the URL, tester, date, and evidence links at the bottom.
 
 ## 1. Configuration and durable storage
 
-- [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured as App Hosting secrets.
+- [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured in Secret Manager and attached to Cloud Run.
 - [ ] Hosted runtime reports `APP_STORE=firestore`; production startup refuses local SQLite.
-- [ ] Firestore exists in the deployment project and the App Hosting service account can read/write it.
+- [ ] Firestore exists in the deployment project and the `traceframe-web` Cloud Run service account can read/write it.
 - [ ] A saved trip and public share link still work after a redeploy or instance restart.
 - [ ] Firestore export/restore ownership and schedule are recorded in `docs/firestore-operations.md`.
 

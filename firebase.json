@@ -1,15 +1,21 @@
 {
-  "apphosting": {
-    "backendId": "traceframe",
-    "rootDir": "apps/web",
+  "hosting": {
+    "site": "antiable-traceframe",
+    "public": "hosting-public",
     "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
-      ".next",
-      "**/.env.local",
-      "**/.env.*.local"
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "traceframe-web",
+          "region": "asia-east1",
+          "pinTag": true
+        }
+      }
     ]
   }
 }

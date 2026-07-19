@@ -8,14 +8,16 @@ import {
   type EditableDay,
 } from "@/lib/trip-edit";
 import type { HydratedTrip } from "@/lib/trips";
+import { getCopy, localePath, localizedTitle, localizeCity, type Locale } from "@/lib/i18n";
 
-export function TripEditor({ trip }: { trip: HydratedTrip }) {
+export function TripEditor({ trip, locale }: { trip: HydratedTrip; locale: Locale }) {
+  const c = getCopy(locale);
   const [title, setTitle] = useState(trip.title);
   const [days, setDays] = useState<EditableDay[]>(trip.days);
   const [shareToken, setShareToken] = useState(trip.shareToken);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const sharePath = shareToken ? `/t/${shareToken}` : null;
+  const sharePath = shareToken ? localePath(locale, `/t/${shareToken}`) : null;
 
   function updateShare(shareAction: "rotate" | "revoke") {
     startTransition(async () => {
@@ -31,13 +33,13 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
           trip?: HydratedTrip;
         };
         if (!res.ok || !body.trip) {
-          setStatus(body.error ?? `分享设置失败 (${res.status})`);
+          setStatus(body.error ?? `${c.editor.shareFailed} (${res.status})`);
           return;
         }
         setShareToken(body.trip.shareToken);
-        setStatus(shareAction === "revoke" ? "旧分享链接已撤销" : "已生成新的分享链接");
+        setStatus(shareAction === "revoke" ? c.editor.revoked : c.editor.generated);
       } catch {
-        setStatus("网络错误，请重试");
+        setStatus(c.editor.network);
       }
     });
   }
@@ -60,15 +62,15 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
         });
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as { error?: string };
-          setStatus(body.error ?? `保存失败 (${res.status})`);
+          setStatus(body.error ?? `${c.editor.saveFailed} (${res.status})`);
           return;
         }
         const body = (await res.json()) as { trip: HydratedTrip };
         setTitle(body.trip.title);
         setDays(body.trip.days);
-        setStatus("已保存");
+        setStatus(c.editor.saved);
       } catch {
-        setStatus("网络错误，请重试");
+        setStatus(c.editor.network);
       }
     });
   }
@@ -76,21 +78,20 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
   return (
     <section>
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
-        <h1>编辑行程</h1>
+        <h1>{c.editor.title}</h1>
         <p>
-          {days.length} 天 · {days.reduce((n, d) => n + d.titles.length, 0)} 部作品 ·
-          调整顺序后点保存
+          {days.length} {c.common.days} · {days.reduce((n, d) => n + d.titles.length, 0)} {c.common.works} · {c.editor.instruction}
         </p>
         <div className="cta-row">
-          <Link className="btn" href="/trips">
-            我的行程
+          <Link className="btn" href={localePath(locale, "/trips")}>
+            {c.editor.myTrips}
           </Link>
-          <Link className="btn" href="/trips/new">
-            再规划一份
+          <Link className="btn" href={localePath(locale, "/trips/new")}>
+            {c.editor.another}
           </Link>
           {sharePath ? (
             <Link className="btn" href={sharePath} target="_blank">
-              打开分享页
+              {c.editor.openShare}
             </Link>
           ) : null}
         </div>
@@ -98,7 +99,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
 
       {sharePath ? (
         <div className="share-box">
-          只读分享： <Link href={sharePath}>{sharePath}</Link>
+          {c.editor.readonly}: <Link href={sharePath}>{sharePath}</Link>
           <div className="cta-row" style={{ marginTop: "0.75rem" }}>
             <button
               className="btn btn-tiny"
@@ -106,7 +107,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
               disabled={pending}
               onClick={() => updateShare("rotate")}
             >
-              更换链接
+              {c.editor.rotate}
             </button>
             <button
               className="btn btn-tiny"
@@ -114,13 +115,13 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
               disabled={pending}
               onClick={() => updateShare("revoke")}
             >
-              撤销分享
+              {c.editor.revoke}
             </button>
           </div>
         </div>
       ) : (
         <div className="share-box">
-          当前未公开分享。
+          {c.editor.private}
           <button
             className="btn btn-tiny"
             style={{ marginLeft: "0.75rem" }}
@@ -128,14 +129,14 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
             disabled={pending}
             onClick={() => updateShare("rotate")}
           >
-            生成分享链接
+            {c.editor.createShare}
           </button>
         </div>
       )}
 
       <div className="trip-form" style={{ marginBottom: "1.5rem" }}>
         <label className="field">
-          行程标题
+          {c.editor.tripTitle}
           <input
             type="text"
             value={title}
@@ -148,9 +149,9 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
             className="btn btn-primary"
             type="button"
             disabled={pending}
-            onClick={() => save(title.trim() || "我的巡礼行程", days)}
+            onClick={() => save(title.trim() || c.editor.defaultTitle, days)}
           >
-            {pending ? "保存中…" : "保存修改"}
+            {pending ? c.editor.saving : c.editor.save}
           </button>
           {status ? <span className="empty">{status}</span> : null}
         </div>
@@ -160,7 +161,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
         <div key={`day-${day.day}-${dayIndex}`} className="trip-day">
           <div className="trip-day-head">
             <h3>
-              Day {dayIndex + 1} · {day.city || "未标注城市"}
+              Day {dayIndex + 1} · {localizeCity(day.city, locale) || c.common.unmappedCity}
             </h3>
             <div className="reorder-actions">
               <button
@@ -169,7 +170,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
                 disabled={dayIndex === 0 || pending}
                 onClick={() => setDays(swapDays(days, dayIndex, dayIndex - 1))}
               >
-                上移天
+                {c.editor.upDay}
               </button>
               <button
                 className="btn btn-tiny"
@@ -177,7 +178,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
                 disabled={dayIndex >= days.length - 1 || pending}
                 onClick={() => setDays(swapDays(days, dayIndex, dayIndex + 1))}
               >
-                下移天
+                {c.editor.downDay}
               </button>
             </div>
           </div>
@@ -185,9 +186,9 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
             {day.titles.map((t, titleIndex) => (
               <li key={t.subjectId} className="lib-item">
                 <div>
-                  <strong>{t.titleCn || t.title || `#${t.subjectId}`}</strong>
+                  <strong>{localizedTitle({ ...t, subjectId: t.subjectId }, locale)}</strong>
                   <div className="meta">
-                    {t.city || "—"} · {t.pointsLength} points
+                    {localizeCity(t.city || "", locale) || "—"} · {t.pointsLength} {c.common.points}
                   </div>
                 </div>
                 <div className="lib-actions">
@@ -238,7 +239,7 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
                     </button>
                   </div>
                   <a href={t.mapUrl} target="_blank" rel="noopener noreferrer">
-                    Anitabi 地图
+                    {c.common.map}
                   </a>
                 </div>
               </li>

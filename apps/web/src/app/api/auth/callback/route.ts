@@ -10,6 +10,7 @@ import {
   encryptToken,
   sessionCookieOptions,
 } from "@/lib/session";
+import { isLocale, localePath } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
@@ -24,8 +25,11 @@ function clearSessionCookie(res: NextResponse) {
   res.cookies.set("antiable_oauth_state", "", { path: "/", maxAge: 0 });
 }
 
-function redirectFailure(request: Request, auth: string) {
-  const res = redirectHome(request, auth);
+function redirectFailure(request: Request, auth: string, locale?: string) {
+  const target = isLocale(locale)
+    ? NextResponse.redirect(absoluteUrl(request, `${localePath(locale)}?auth=${auth}`))
+    : redirectHome(request, auth);
+  const res = target;
   clearSessionCookie(res);
   return res;
 }
@@ -61,7 +65,7 @@ export async function GET(request: Request) {
     token = await exchangeCode(code, payload.r);
   } catch (error) {
     console.error("Bangumi OAuth token exchange failed", error);
-    return redirectFailure(request, "exchange_failed");
+    return redirectFailure(request, "exchange_failed", payload.l);
   }
 
   let me;
@@ -69,7 +73,7 @@ export async function GET(request: Request) {
     me = await fetchBangumiMe(token.access_token);
   } catch (error) {
     console.error("Bangumi profile request failed", error);
-    return redirectFailure(request, "profile_failed");
+    return redirectFailure(request, "profile_failed", payload.l);
   }
 
   const userId = `bgm:${me.id}`;
@@ -80,7 +84,7 @@ export async function GET(request: Request) {
     refreshTokenEnc = token.refresh_token ? encryptToken(token.refresh_token) : null;
   } catch (error) {
     console.error("OAuth token encryption failed", error);
-    return redirectFailure(request, "session_failed");
+    return redirectFailure(request, "session_failed", payload.l);
   }
   const tokenExpiresAt = Date.now() + token.expires_in * 1000;
 
@@ -103,7 +107,7 @@ export async function GET(request: Request) {
     }
   } catch (error) {
     console.error("OAuth user persistence failed", error);
-    return redirectFailure(request, "storage_failed");
+    return redirectFailure(request, "storage_failed", payload.l);
   }
 
   try {
@@ -120,7 +124,8 @@ export async function GET(request: Request) {
       tokenExpiresAt,
     });
 
-    const res = NextResponse.redirect(absoluteUrl(request, "/library"));
+    const destination = isLocale(payload.l) ? localePath(payload.l, "/library") : "/library";
+    const res = NextResponse.redirect(absoluteUrl(request, destination));
     const opts = sessionCookieOptions();
     // Overwrites the temporary OAuth state value in `__session`.
     res.cookies.set(COOKIE_NAME, session, opts);
@@ -129,6 +134,6 @@ export async function GET(request: Request) {
     return res;
   } catch (error) {
     console.error("OAuth session creation failed", error);
-    return redirectFailure(request, "session_failed");
+    return redirectFailure(request, "session_failed", payload.l);
   }
 }

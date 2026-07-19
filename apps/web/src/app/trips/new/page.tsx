@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
+import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
@@ -12,24 +14,26 @@ export default async function NewTripPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const session = await getSession();
+  const locale = await getLocale();
+  const c = getCopy(locale);
   const { configured } = getBangumiOAuthConfig();
   const params = await searchParams;
 
   if (!session?.user) {
     return (
       <section className="hero">
-        <h1>规划行程</h1>
-        <p>登录后可从已映射收藏生成 1–3 天城市级巡礼草稿，并分享只读链接。</p>
+        <h1>{c.newTrip.title}</h1>
+        <p>{c.newTrip.loginIntro}</p>
         <div className="cta-row">
           {configured ? (
-            <a className="btn btn-primary" href="/api/auth/bangumi">
-              使用 Bangumi 登录
+            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}`}>
+              {c.common.login}
             </a>
           ) : (
-            <span className="btn">OAuth 未配置</span>
+            <span className="btn">{c.common.oauthMissing}</span>
           )}
-          <Link className="btn" href="/presence">
-            先浏览 Presence
+          <Link className="btn" href={localePath(locale, "/presence")}>
+            {c.common.browsePresence}
           </Link>
         </div>
       </section>
@@ -45,8 +49,8 @@ export default async function NewTripPage({
       if (!p || p.pointsLength <= 0) return null;
       return {
         subjectId: item.subjectId,
-        title: p.titleCn || p.title || `#${item.subjectId}`,
-        city: p.city || "—",
+        title: localizedTitle(p, locale),
+        city: localizeCity(p.city || "—", locale),
         pointsLength: p.pointsLength,
       };
     })
@@ -57,8 +61,8 @@ export default async function NewTripPage({
     mapped.length === 0
       ? presence.list({ limit: 50 }).map((p) => ({
           subjectId: p.subjectId,
-          title: p.titleCn || p.title || `#${p.subjectId}`,
-          city: p.city || "—",
+          title: localizedTitle(p, locale),
+          city: localizeCity(p.city || "—", locale),
           pointsLength: p.pointsLength,
         }))
       : [];
@@ -68,56 +72,47 @@ export default async function NewTripPage({
   await app.close();
   presence.close();
 
-  const errorMsg =
-    params.error === "empty"
-      ? "请至少选择一部已映射作品。"
-      : params.error === "unmapped"
-        ? "所选作品在 Presence 中均无覆盖。"
-        : params.error === "failed"
-          ? "创建失败，请稍后重试。"
-          : null;
+  const errorMsg = params.error && params.error in c.newTrip.errors
+    ? c.newTrip.errors[params.error as keyof typeof c.newTrip.errors]
+    : null;
 
   return (
     <section>
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
-        <h1>规划行程</h1>
-        <p>
-          选择已映射作品，按城市自动分到 1–3 天。行程只保存元数据与 Anitabi 深链，不镜像 POI
-          截图。
-        </p>
+        <h1>{c.newTrip.title}</h1>
+        <p>{c.newTrip.intro}</p>
       </div>
 
       {errorMsg ? <p className="empty">{errorMsg}</p> : null}
 
       {picks.length === 0 ? (
         <p className="empty">
-          暂无可用作品。请先{" "}
-          <Link href="/library">同步 Library</Link>，或等待 Presence 索引导入。
+          {c.newTrip.noPicks} <Link href={localePath(locale, "/library")}>Library</Link>
         </p>
       ) : (
         <form className="trip-form" action="/api/trips" method="post">
           {usingFallback ? (
             <p className="empty">
-              收藏中尚无已映射作品，已改用公开 Presence 索引供试填。建议先同步 Library。
+              {c.newTrip.fallback}
             </p>
           ) : null}
 
           <label className="field">
-            行程标题
-            <input type="text" name="title" placeholder="例如：东京两日巡礼" maxLength={80} />
+            {c.newTrip.tripTitle}
+            <input type="text" name="title" defaultValue={c.editor.defaultTitle} placeholder={c.newTrip.placeholder} maxLength={80} />
           </label>
 
           <label className="field">
-            天数
+            {c.newTrip.dayCount}
             <select name="dayCount" defaultValue="2">
-              <option value="1">1 天</option>
-              <option value="2">2 天</option>
-              <option value="3">3 天</option>
+              <option value="1">1 {c.common.days}</option>
+              <option value="2">2 {c.common.days}</option>
+              <option value="3">3 {c.common.days}</option>
             </select>
           </label>
 
           <div>
-            <h2 className="section-title">选择作品</h2>
+            <h2 className="section-title">{c.newTrip.choose}</h2>
             <ul className="pick-list">
               {picks.map((item) => (
                 <li key={item.subjectId}>
@@ -126,7 +121,7 @@ export default async function NewTripPage({
                     <span>
                       <strong>{item.title}</strong>
                       <div className="meta">
-                        {item.city} · {item.pointsLength} points
+                        {item.city} · {item.pointsLength} {c.common.points}
                       </div>
                     </span>
                   </label>
@@ -137,10 +132,10 @@ export default async function NewTripPage({
 
           <div className="cta-row">
             <button className="btn btn-primary" type="submit">
-              生成行程
+              {c.newTrip.generate}
             </button>
-            <Link className="btn" href="/library">
-              返回 Library
+            <Link className="btn" href={localePath(locale, "/library")}>
+              {c.newTrip.back}
             </Link>
           </div>
         </form>

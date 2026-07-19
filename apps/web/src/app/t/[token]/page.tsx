@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
+import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,8 @@ export default async function SharedTripPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+  const locale = await getLocale();
+  const c = getCopy(locale);
   const store = openAppStore();
   const trip = await store.getTripByShareToken(token);
   await store.close();
@@ -23,14 +27,14 @@ export default async function SharedTripPage({
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
         <h1>{view.title}</h1>
         <p>
-          只读分享 · {view.days.length} 天 · {view.subjectIds.length} 部 · 地图跳转 Anitabi
+          {c.shared.readonly} · {view.days.length} {c.common.days} · {view.subjectIds.length} {c.common.works} · {c.shared.mapNote}
         </p>
         <div className="cta-row">
-          <Link className="btn btn-primary" href="/trips/new">
-            自己也规划一份
+          <Link className="btn btn-primary" href={localePath(locale, "/trips/new")}>
+            {c.shared.makeOwn}
           </Link>
-          <Link className="btn" href="/presence">
-            Presence 索引
+          <Link className="btn" href={localePath(locale, "/presence")}>
+            {c.shared.index}
           </Link>
         </div>
       </div>
@@ -38,20 +42,20 @@ export default async function SharedTripPage({
       {view.days.map((day) => (
         <div key={day.day} className="trip-day">
           <h3>
-            Day {day.day} · {day.city || "未标注城市"}
+            Day {day.day} · {localizeCity(day.city, locale) || c.common.unmappedCity}
           </h3>
           <ul className="lib-list">
             {day.titles.map((t) => (
               <li key={t.subjectId} className="lib-item">
                 <div>
-                  <strong>{t.titleCn || t.title || `#${t.subjectId}`}</strong>
+                  <strong>{localizedTitle(t, locale)}</strong>
                   <div className="meta">
-                    {t.city || "—"} · {t.pointsLength} points
+                    {localizeCity(t.city, locale) || "—"} · {t.pointsLength} {c.common.points}
                   </div>
                 </div>
                 <div className="lib-actions">
                   <a href={t.mapUrl} target="_blank" rel="noopener noreferrer">
-                    Anitabi 地图
+                    {c.common.map}
                   </a>
                 </div>
               </li>

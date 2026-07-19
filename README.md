@@ -47,6 +47,10 @@ Copy `apps/web/.env.example` → `apps/web/.env.local` and fill Bangumi OAuth cr
 | `/privacy` | Stored-data explanation and account deletion |
 | `/data-policy` | License and commercial-use guardrails |
 
+Public page routes are locale-prefixed: `/zh-CN`, `/zh-TW`, or `/ja-JP`
+(for example, `/ja-JP/presence`). Legacy unprefixed page URLs redirect to the
+saved/browser locale. API and OAuth callback routes remain unprefixed.
+
 Generated/raw reports: `reports/` (ignored because smoke artifacts may contain personal data or live tokens) · tracked sanitized evidence: [`docs/evidence/`](docs/evidence/) · DB: `data/presence.sqlite`
 
 Set `SKIP_NETWORK=1` on smoke/coverage for offline CI. If Anitabi returns Cloudflare 403 or a challenge, stop the refresh; smoke may fall back to the curated presence seed. Do not rotate egress to continue enumeration.

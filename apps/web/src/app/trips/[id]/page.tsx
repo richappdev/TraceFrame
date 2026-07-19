@@ -4,6 +4,8 @@ import { TripEditor } from "@/components/TripEditor";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
+import { getCopy, localePath } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,8 @@ export default async function TripDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const c = getCopy(locale);
   const session = await getSession();
   const store = openAppStore();
   const trip = await store.getTrip(id);
@@ -23,14 +27,14 @@ export default async function TripDetailPage({
     if (trip.shareToken) {
       return (
         <section className="hero">
-          <h1>需要访问权限</h1>
-          <p>此行程仅所有者可编辑。若你有分享链接，请打开只读分享页。</p>
+          <h1>{c.access.title}</h1>
+          <p>{c.access.body}</p>
           <div className="cta-row">
-            <Link className="btn btn-primary" href={`/t/${trip.shareToken}`}>
-              打开分享页
+            <Link className="btn btn-primary" href={localePath(locale, `/t/${trip.shareToken}`)}>
+              {c.access.open}
             </Link>
-            <Link className="btn" href="/api/auth/bangumi">
-              登录
+            <Link className="btn" href={`/api/auth/bangumi?locale=${locale}`}>
+              {c.access.login}
             </Link>
           </div>
         </section>
@@ -39,5 +43,5 @@ export default async function TripDetailPage({
     notFound();
   }
 
-  return <TripEditor trip={hydrateTrip(trip)} />;
+  return <TripEditor trip={hydrateTrip(trip)} locale={locale} />;
 }

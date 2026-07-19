@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
+import { collectionLabel, getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +15,8 @@ export default async function LibraryPage({
   searchParams: Promise<{ mapped?: string }>;
 }) {
   const session = await getSession();
+  const locale = await getLocale();
+  const c = getCopy(locale);
   const { configured } = getBangumiOAuthConfig();
   const params = await searchParams;
   const mappedOnly = params.mapped === "1";
@@ -20,18 +24,18 @@ export default async function LibraryPage({
   if (!session?.user) {
     return (
       <section className="hero">
-        <h1>Library</h1>
-        <p>登录 Bangumi 后，可查看收藏中哪些作品在 Anitabi 有巡礼地图覆盖。</p>
+        <h1>{c.library.title}</h1>
+        <p>{c.library.loginIntro}</p>
         <div className="cta-row">
           {configured ? (
-            <a className="btn btn-primary" href="/api/auth/bangumi">
-              使用 Bangumi 登录
+            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}`}>
+              {c.common.login}
             </a>
           ) : (
-            <span className="btn">OAuth 未配置（见 apps/web/.env.example）</span>
+            <span className="btn">{c.common.oauthMissing}</span>
           )}
-          <Link className="btn" href="/presence">
-            先浏览公开 Presence 索引
+          <Link className="btn" href={localePath(locale, "/presence")}>
+            {c.library.publicIndex}
           </Link>
         </div>
       </section>
@@ -47,8 +51,8 @@ export default async function LibraryPage({
     return {
       ...item,
       mapped,
-      title: p?.titleCn || p?.title || `#${item.subjectId}`,
-      city: p?.city ?? "—",
+      title: p ? localizedTitle(p, locale) : `#${item.subjectId}`,
+      city: localizeCity(p?.city ?? "—", locale),
       pointsLength: p?.pointsLength ?? 0,
       mapUrl: mapped ? anitabiMapUrl(item.subjectId) : null,
     };
@@ -62,34 +66,34 @@ export default async function LibraryPage({
   return (
     <section>
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
-        <h1>{session.user.nickname || session.user.username} 的收藏</h1>
+        <h1>{session.user.nickname || session.user.username}{c.library.possessive}</h1>
         <p>
-          共 {joined.length} 部动画 · 已映射 {mappedCount} 部
-          {joined.length === 0 ? " · 点击同步从 Bangumi 拉取收藏" : ""}
+          {joined.length} {c.common.works} · {c.common.mapped} {mappedCount}
+          {joined.length === 0 ? ` · ${c.library.clickSync}` : ""}
         </p>
         <div className="cta-row">
           <form action="/api/me/library/sync" method="post">
             <button className="btn btn-primary" type="submit">
-              同步收藏
+              {c.library.sync}
             </button>
           </form>
-          <Link className="btn" href={mappedOnly ? "/library" : "/library?mapped=1"}>
-            {mappedOnly ? "显示全部" : "仅看已映射"}
+          <Link className="btn" href={mappedOnly ? localePath(locale, "/library") : `${localePath(locale, "/library")}?mapped=1`}>
+            {mappedOnly ? c.library.showAll : c.library.mappedOnly}
           </Link>
-          <Link className="btn btn-primary" href="/trips/new">
-            规划行程
+          <Link className="btn btn-primary" href={localePath(locale, "/trips/new")}>
+            {c.library.plan}
           </Link>
-          <Link className="btn" href="/trips">
-            我的行程
+          <Link className="btn" href={localePath(locale, "/trips")}>
+            {c.library.myTrips}
           </Link>
-          <a className="btn" href="/api/auth/logout">
-            退出
+          <a className="btn" href={`/api/auth/logout?locale=${locale}`}>
+            {c.library.logout}
           </a>
         </div>
       </div>
 
       {view.length === 0 ? (
-        <p className="empty">暂无条目。请先同步收藏，或关闭「仅看已映射」筛选。</p>
+        <p className="empty">{c.library.empty}</p>
       ) : (
         <ul className="lib-list">
           {view.map((item) => (
@@ -97,19 +101,19 @@ export default async function LibraryPage({
               <div>
                 <strong>{item.title}</strong>
                 <div className="meta">
-                  {item.collectionType} · {item.city}
-                  {item.mapped ? ` · ${item.pointsLength} points` : ""}
+                  {collectionLabel(item.collectionType, locale)} · {item.city}
+                  {item.mapped ? ` · ${item.pointsLength} ${c.common.points}` : ""}
                 </div>
               </div>
               <div className="lib-actions">
                 {item.mapped ? (
-                  <span className="badge mapped">已映射</span>
+                  <span className="badge mapped">{c.common.mapped}</span>
                 ) : (
-                  <span className="badge">未映射</span>
+                  <span className="badge">{c.common.unmapped}</span>
                 )}
                 {item.mapUrl ? (
                   <a href={item.mapUrl} target="_blank" rel="noopener noreferrer">
-                    Anitabi 地图
+                    {c.common.map}
                   </a>
                 ) : null}
               </div>

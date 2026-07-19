@@ -1,49 +1,65 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { getCopy, localePath } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Traceframe — 动画巡礼行程规划",
-    template: "%s · Traceframe",
-  },
-  description: "从 Bangumi 收藏找到 Anitabi 巡礼地图，并规划 1–3 天的城市行程。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).site;
+  return {
+    title: { default: c.title, template: `%s · Traceframe` },
+    description: c.description,
+    alternates: {
+      languages: {
+        "zh-CN": localePath("zh-CN"),
+        "zh-TW": localePath("zh-TW"),
+        "ja-JP": localePath("ja-JP"),
+      },
+    },
+  };
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+  const c = getCopy(locale).site;
   return (
-    <html lang="zh-CN">
+    <html lang={locale}>
       <body>
         <div className="shell">
           <header className="topbar">
             <div className="topbar-inner">
-              <a className="brand" href="/" aria-label="Traceframe 首页">
+              <a className="brand" href={localePath(locale)} aria-label={c.home}>
                 <span className="brand-mark" aria-hidden="true"><i /></span>
-                <span>TRACEFRAME<small>巡礼行程手帖</small></span>
+                <span>TRACEFRAME<small>{c.tagline}</small></span>
               </a>
-              <nav className="nav" aria-label="主导航">
-                <a href="/presence">发现</a>
-                <a href="/library">收藏</a>
-                <a href="/trips">行程</a>
-                <a href="/data-policy">数据政策</a>
+              <nav className="nav" aria-label={c.nav}>
+                <a href={localePath(locale, "/presence")}>{c.discover}</a>
+                <a href={localePath(locale, "/library")}>{c.library}</a>
+                <a href={localePath(locale, "/trips")}>{c.trips}</a>
+                <a href={localePath(locale, "/data-policy")}>{c.policy}</a>
               </nav>
-              <a className="nav-cta" href="/trips/new">规划路线 <span aria-hidden="true">↗</span></a>
+              <a className="nav-cta" href={localePath(locale, "/trips/new")}>{c.plan} <span aria-hidden="true">↗</span></a>
             </div>
           </header>
           <main>{children}</main>
           <footer className="site-footer">
             <div className="footer-inner">
               <div>
-                <a className="footer-brand" href="/">TRACEFRAME</a>
-                <p>把喜欢的故事，排进真实旅程。</p>
+                <a className="footer-brand" href={localePath(locale)}>TRACEFRAME</a>
+                <p>{c.footer}</p>
               </div>
               <p className="data-credit">
-                地图数据来自 <a href="https://anitabi.cn" rel="noopener noreferrer" target="_blank">Anitabi</a> 贡献者，
-                CC BY-NC-SA · 条目数据来自 <a href="https://bgm.tv" rel="noopener noreferrer" target="_blank">Bangumi</a>
+                {locale === "ja-JP" ? "地図データ：" : locale === "zh-TW" ? "地圖資料來自 " : "地图数据来自 "}
+                <a href="https://anitabi.cn" rel="noopener noreferrer" target="_blank">Anitabi</a>
+                {locale === "ja-JP" ? " contributors（CC BY-NC-SA）、作品データ：" : " 贡献者，CC BY-NC-SA · "}
+                <a href="https://bgm.tv" rel="noopener noreferrer" target="_blank">Bangumi</a>
               </p>
               <p className="data-credit">
-                <a href="/privacy">隐私与数据删除</a> · <a href="/data-policy">数据与许可政策</a>
+                <a href={localePath(locale, "/privacy")}>{c.privacy}</a> · <a href={localePath(locale, "/data-policy")}>{c.license}</a>
               </p>
+              <LanguageSwitcher locale={locale} label={c.language} />
               <p className="footer-code">TF / 2026</p>
             </div>
           </footer>

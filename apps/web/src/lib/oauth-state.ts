@@ -14,14 +14,17 @@ export interface OAuthStatePayload {
   e: number;
   /** redirect_uri used in authorize (must match token exchange) */
   r: string;
+  /** Interface locale to restore after the external OAuth round trip. */
+  l?: string;
 }
 
 /** Create CSRF state embedding redirect_uri: `payload.sig`. */
-export function createOAuthState(redirectUri: string, ttlMs = 10 * 60 * 1000): string {
+export function createOAuthState(redirectUri: string, ttlMs = 10 * 60 * 1000, locale?: string): string {
   const payload: OAuthStatePayload = {
     n: randomBytes(16).toString("hex"),
     e: Date.now() + ttlMs,
     r: redirectUri,
+    l: locale,
   };
   const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   const sig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");

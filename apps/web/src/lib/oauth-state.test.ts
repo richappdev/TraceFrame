@@ -14,6 +14,13 @@ describe("oauth state", () => {
     const state = createOAuthState("https://app.example.com/api/auth/callback");
     expect(verifyOAuthState(state)).toBe(true);
     expect(parseOAuthState(state)?.r).toBe("https://app.example.com/api/auth/callback");
+
+    const localized = createOAuthState(
+      "https://app.example.com/api/auth/callback",
+      undefined,
+      "ja-JP",
+    );
+    expect(parseOAuthState(localized)?.l).toBe("ja-JP");
   });
 
   it("rejects tampered or expired state", () => {

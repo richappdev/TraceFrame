@@ -3,28 +3,32 @@ import { getSession } from "@/lib/auth";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { openAppStore } from "@/lib/db";
 import { parseSubjectIds, parseTripDays } from "@/lib/trips";
+import { formatDateTime, getCopy, localePath, localizeCity } from "@/lib/i18n";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function TripsPage() {
   const session = await getSession();
+  const locale = await getLocale();
+  const c = getCopy(locale);
   const { configured } = getBangumiOAuthConfig();
 
   if (!session?.user) {
     return (
       <section className="hero">
-        <h1>我的行程</h1>
-        <p>登录后可查看已保存的 1–3 天巡礼草稿与分享链接。</p>
+        <h1>{c.trips.title}</h1>
+        <p>{c.trips.loginIntro}</p>
         <div className="cta-row">
           {configured ? (
-            <a className="btn btn-primary" href="/api/auth/bangumi">
-              使用 Bangumi 登录
+            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}`}>
+              {c.common.login}
             </a>
           ) : (
-            <span className="btn">OAuth 未配置</span>
+            <span className="btn">{c.common.oauthMissing}</span>
           )}
-          <Link className="btn" href="/presence">
-            先浏览 Presence
+          <Link className="btn" href={localePath(locale, "/presence")}>
+            {c.common.browsePresence}
           </Link>
         </div>
       </section>
@@ -38,13 +42,13 @@ export default async function TripsPage() {
   return (
     <section>
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
-        <h1>我的行程</h1>
-        <p>共 {trips.length} 份草稿。分享链接为只读，不含 Anitabi POI 截图。</p>
+        <h1>{c.trips.title}</h1>
+        <p>{trips.length} · {c.trips.intro}</p>
         <div className="cta-row">
-          <Link className="btn btn-primary" href="/trips/new">
-            规划新行程
+          <Link className="btn btn-primary" href={localePath(locale, "/trips/new")}>
+            {c.trips.new}
           </Link>
-          <Link className="btn" href="/library">
+          <Link className="btn" href={localePath(locale, "/library")}>
             Library
           </Link>
         </div>
@@ -52,8 +56,7 @@ export default async function TripsPage() {
 
       {trips.length === 0 ? (
         <p className="empty">
-          还没有行程。从{" "}
-          <Link href="/trips/new">已映射作品</Link> 生成一份 1–3 天草稿。
+          {c.trips.empty} <Link href={localePath(locale, "/trips/new")}>{c.trips.emptyAction}</Link>
         </p>
       ) : (
         <ul className="lib-list">
@@ -65,19 +68,19 @@ export default async function TripsPage() {
               <li key={trip.id} className="lib-item">
                 <div>
                   <strong>
-                    <Link href={`/trips/${trip.id}`}>{trip.title}</Link>
+                    <Link href={localePath(locale, `/trips/${trip.id}`)}>{trip.title}</Link>
                   </strong>
                   <div className="meta">
-                    {days.length} 天 · {subjectIds.length} 部
-                    {cities.length ? ` · ${cities.slice(0, 3).join(" / ")}` : ""}
+                    {days.length} {c.common.days} · {subjectIds.length} {c.common.works}
+                    {cities.length ? ` · ${cities.slice(0, 3).map((city) => localizeCity(city, locale)).join(" / ")}` : ""}
                     {" · "}
-                    {new Date(trip.updatedAt).toLocaleString("zh-CN")}
+                    {formatDateTime(trip.updatedAt, locale)}
                   </div>
                 </div>
                 <div className="lib-actions">
-                  <Link href={`/trips/${trip.id}`}>编辑</Link>
+                  <Link href={localePath(locale, `/trips/${trip.id}`)}>{c.common.edit}</Link>
                   {trip.shareToken ? (
-                    <Link href={`/t/${trip.shareToken}`}>分享页</Link>
+                    <Link href={localePath(locale, `/t/${trip.shareToken}`)}>{c.common.sharePage}</Link>
                   ) : null}
                 </div>
               </li>

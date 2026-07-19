@@ -3,7 +3,7 @@
 ## Beachhead and pilot
 
 - Beachhead: Chinese-speaking independent travelers planning an anime-focused Japan trip.
-- MVP language: Simplified Chinese; English is the next localization only after the pilot passes.
+- Supported interface locales: Simplified Chinese (`zh-CN`, default), Traditional Chinese for Taiwan (`zh-TW`), and Japanese (`ja-JP`). Locale-prefixed public URLs are canonical; unprefixed page URLs redirect using the saved preference or `Accept-Language`.
 - Pilot geography: greater Kyoto/Uji. This tests whether coarse work-level Presence can produce a useful plan before POI-level routing is built.
 
 ## M0 evidence status

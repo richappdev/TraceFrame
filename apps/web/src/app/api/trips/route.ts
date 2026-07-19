@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "empty_selection" }, { status: 400 });
     }
 
-    const presence = openPresenceStore();
+    const presence = await openPresenceStore();
     const records = input.subjectIds
       .map((id) => presence.get(id))
       .filter((r): r is NonNullable<typeof r> => r != null && r.pointsLength > 0);
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
       if (input.templateId) createdQuery.set("template", input.templateId);
       return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}?${createdQuery}`), 303);
     }
-    return NextResponse.json({ ok: true, trip: hydrateTrip(created) }, { status: 201 });
+    return NextResponse.json({ ok: true, trip: await hydrateTrip(created) }, { status: 201 });
   } catch (err) {
     console.error(err);
     if (wantsHtml) {

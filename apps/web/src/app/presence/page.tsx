@@ -18,7 +18,7 @@ export default async function PresencePage({
   const curated = curatedCopy(locale);
   const city = params.city?.trim() || undefined;
 
-  const store = openPresenceStore();
+  const store = await openPresenceStore();
   const items = store.list({ limit: 100, city }).map(presenceToPublic);
   const cities = store.cityStats(30);
   const total = store.count();

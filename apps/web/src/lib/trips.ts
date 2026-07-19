@@ -50,10 +50,10 @@ export type HydratedTrip = {
   days: HydratedDay[];
 };
 
-export function hydrateTrip(trip: TripRow): HydratedTrip {
+export async function hydrateTrip(trip: TripRow): Promise<HydratedTrip> {
   const days = parseTripDays(trip.daysJson);
   const subjectIds = parseSubjectIds(trip.subjectIdsJson);
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
   try {
     const titles = new Map<number, HydratedTitle>();
     for (const id of subjectIds) {

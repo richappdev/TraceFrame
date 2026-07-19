@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAccessToken, getSession } from "@/lib/auth";
 import { collectionToLibraryItem, fetchUserCollections } from "@/lib/collections";
 import { openAppStore } from "@/lib/db";
+import { openPresenceStore } from "@/lib/presence";
+import { enqueueUnmatchedForVerify, openPresenceVerifyBackend } from "@/lib/presence-verify";
 import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
 
 export const runtime = "nodejs";
@@ -22,14 +24,28 @@ async function syncLibrary() {
 
   const collections = await fetchUserCollections(username, token);
   const now = new Date().toISOString();
+  const items = collections.map((c) => collectionToLibraryItem(session.user.id, c, now));
   const store = openAppStore();
-  await store.replaceLibrary(
-    session.user.id,
-    collections.map((c) => collectionToLibraryItem(session.user.id, c, now)),
-  );
+  await store.replaceLibrary(session.user.id, items);
   const count = (await store.listLibrary(session.user.id)).length;
   await store.close();
-  return { ok: true as const, synced: count };
+
+  const presence = await openPresenceStore();
+  const verify = openPresenceVerifyBackend();
+  let enqueue = { considered: 0, enqueued: 0, skipped: 0 };
+  try {
+    enqueue = await enqueueUnmatchedForVerify({
+      subjectIds: items.map((item) => item.subjectId),
+      presence,
+      verify,
+    });
+  } catch (err) {
+    console.warn("[library-sync] presence enqueue skipped:", err);
+  } finally {
+    presence.close();
+  }
+
+  return { ok: true as const, synced: count, enqueue };
 }
 
 export async function POST(request: Request) {
@@ -53,7 +69,11 @@ export async function POST(request: Request) {
     if (wantsHtml) {
       return NextResponse.redirect(absoluteUrl(request, "/library?synced=1"), 303);
     }
-    return NextResponse.json({ ok: true, synced: result.synced });
+    return NextResponse.json({
+      ok: true,
+      synced: result.synced,
+      enqueue: result.enqueue,
+    });
   } catch (err) {
     console.error(err);
     if (wantsHtml) {

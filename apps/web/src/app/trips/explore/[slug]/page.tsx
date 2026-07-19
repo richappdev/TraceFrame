@@ -21,7 +21,7 @@ export default async function CuratedTripPage({ params }: { params: Promise<{ sl
   const copy = curatedCopy(locale);
   const common = getCopy(locale).common;
   const subjectIds = curatedTripSubjectIds(trip);
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
   const titles = new Map(
     subjectIds.flatMap((id) => {
       const row = presence.get(id);

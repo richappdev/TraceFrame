@@ -4,7 +4,7 @@ import { parsePaginationInteger } from "@/lib/pagination";
 
 export const runtime = "nodejs";
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
   const url = new URL(request.url);
   const limit = parsePaginationInteger(url.searchParams.get("limit"), {
     defaultValue: 50,
@@ -20,7 +20,7 @@ export function GET(request: Request) {
   }
   const city = url.searchParams.get("city") ?? undefined;
 
-  const store = openPresenceStore();
+  const store = await openPresenceStore();
   try {
     const items = store.list({ limit, offset, city }).map(presenceToPublic);
     return NextResponse.json({

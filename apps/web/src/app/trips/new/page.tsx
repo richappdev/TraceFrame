@@ -48,7 +48,7 @@ export default async function NewTripPage({
   }
 
   const app = openAppStore();
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
   const library = await app.listLibrary(session.user.id);
   const mapped = library
     .map((item) => {

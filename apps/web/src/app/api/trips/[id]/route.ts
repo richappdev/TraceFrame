@@ -42,7 +42,7 @@ export async function GET(request: Request, ctx: Ctx) {
     if (!canRead(trip.ownerId, trip.shareToken, session?.user?.id, token)) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
-    return NextResponse.json({ trip: hydrateTrip(trip) });
+    return NextResponse.json({ trip: await hydrateTrip(trip) });
   } finally {
     await store.close();
   }
@@ -120,7 +120,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     });
 
     const updated = (await store.getTrip(id))!;
-    return NextResponse.json({ ok: true, trip: hydrateTrip(updated) });
+    return NextResponse.json({ ok: true, trip: await hydrateTrip(updated) });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

@@ -15,7 +15,7 @@ export default async function HomePage({
   const c = getCopy(locale);
   const curated = curatedCopy(locale);
   const featuredTrips = curatedTrips.slice(0, 3);
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
   const featuredPoints = new Map(featuredTrips.map((trip) => [
     trip.slug,
     curatedTripSubjectIds(trip).reduce((sum, id) => sum + (presence.get(id)?.pointsLength ?? 0), 0),

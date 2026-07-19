@@ -29,7 +29,7 @@ gcloud run deploy $Service `
   --max 4 `
   --concurrency 40 `
   --set-env-vars "NODE_ENV=production,APP_STORE=firestore,DATA_DIR=/tmp/antiable,HOSTNAME=0.0.0.0" `
-  --set-secrets "BANGUMI_CLIENT_ID=BANGUMI_CLIENT_ID:latest,BANGUMI_CLIENT_SECRET=BANGUMI_CLIENT_SECRET:latest,BANGUMI_REDIRECT_URI=BANGUMI_REDIRECT_URI:latest,SESSION_SECRET=SESSION_SECRET:latest"
+  --set-secrets "BANGUMI_CLIENT_ID=BANGUMI_CLIENT_ID:latest,BANGUMI_CLIENT_SECRET=BANGUMI_CLIENT_SECRET:latest,BANGUMI_REDIRECT_URI=BANGUMI_REDIRECT_URI:latest,SESSION_SECRET=SESSION_SECRET:latest,PRESENCE_DRAIN_SECRET=PRESENCE_DRAIN_SECRET:latest"
 
 if ($LASTEXITCODE -ne 0) {
   throw "Cloud Run deployment failed; Firebase Hosting was not changed."

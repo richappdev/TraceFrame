@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function ExploreTripsPage() {
   const locale = await getLocale();
   const copy = curatedCopy(locale);
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
   const pointCounts = new Map(
     curatedTrips.map((trip) => [
       trip.slug,

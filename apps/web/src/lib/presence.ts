@@ -2,6 +2,7 @@ import path from "node:path";
 import { loadValidIdsCsv, PresenceStore } from "@antiable/presence";
 import { anitabiMapUrl } from "@antiable/anitabi";
 import { getDataDir, getSeedCsvPath } from "./paths";
+import { openPresenceVerifyBackend } from "./presence-verify";
 
 let seeded = false;
 
@@ -29,9 +30,20 @@ function ensureSeeded(store: PresenceStore): void {
   }
 }
 
-export function openPresenceStore(): PresenceStore {
+/**
+ * Open Presence SQLite (CSV seed) and merge durable Firestore / runtime-verified rows.
+ */
+export async function openPresenceStore(): Promise<PresenceStore> {
   const store = new PresenceStore(getPresenceDbPath());
   ensureSeeded(store);
+  try {
+    const verify = openPresenceVerifyBackend();
+    const remote = await verify.listPresenceRecords();
+    const mapped = remote.filter((r) => r.pointsLength > 0);
+    if (mapped.length > 0) store.upsertMany(mapped);
+  } catch (err) {
+    console.warn("[presence] runtime overlay skipped:", err);
+  }
   return store;
 }
 

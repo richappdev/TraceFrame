@@ -21,7 +21,7 @@ export default async function SharedTripPage({
   await store.close();
   if (!trip) notFound();
 
-  const view = hydrateTrip(trip);
+  const view = await hydrateTrip(trip);
 
   return (
     <section>

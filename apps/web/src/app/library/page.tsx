@@ -1,9 +1,11 @@
 import { anitabiMapUrl } from "@antiable/anitabi";
 import Link from "next/link";
 import { AnalyticsLink } from "@/components/AnalyticsEvent";
+import { LibraryRefreshWhileChecking } from "@/components/LibraryRefreshWhileChecking";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
+import { libraryMapState, openPresenceVerifyBackend } from "@/lib/presence-verify";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { collectionLabel, getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
@@ -44,13 +46,22 @@ export default async function LibraryPage({
   }
 
   const app = openAppStore();
-  const presence = openPresenceStore();
+  const presence = await openPresenceStore();
+  const verify = openPresenceVerifyBackend();
   const library = await app.listLibrary(session.user.id);
+  const subjectIds = library.map((item) => item.subjectId);
+  const queueStatuses = await verify.getQueueStatuses(subjectIds);
+
   const joined = library.map((item) => {
     const p = presence.get(item.subjectId);
-    const mapped = p != null && p.pointsLength > 0;
+    const state = libraryMapState({
+      presence: p,
+      queueStatus: queueStatuses.get(item.subjectId),
+    });
+    const mapped = state === "mapped";
     return {
       ...item,
+      state,
       mapped,
       title: localizedTitle(
         {
@@ -70,13 +81,16 @@ export default async function LibraryPage({
 
   const view = mappedOnly ? joined.filter((j) => j.mapped) : joined;
   const mappedCount = joined.filter((j) => j.mapped).length;
+  const checkingCount = joined.filter((j) => j.state === "checking").length;
 
   return (
     <section>
+      <LibraryRefreshWhileChecking enabled={checkingCount > 0} />
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
         <h1>{session.user.nickname || session.user.username}{c.library.possessive}</h1>
         <p>
           {joined.length} {c.common.works} · {c.common.mapped} {mappedCount}
+          {checkingCount > 0 ? ` · ${c.common.checking} ${checkingCount}` : ""}
           {joined.length === 0 ? ` · ${c.library.clickSync}` : ""}
         </p>
         <div className="cta-row">
@@ -114,8 +128,10 @@ export default async function LibraryPage({
                 </div>
               </div>
               <div className="lib-actions">
-                {item.mapped ? (
+                {item.state === "mapped" ? (
                   <span className="badge mapped">{c.common.mapped}</span>
+                ) : item.state === "checking" ? (
+                  <span className="badge">{c.common.checking}</span>
                 ) : (
                   <span className="badge">{c.common.unmapped}</span>
                 )}

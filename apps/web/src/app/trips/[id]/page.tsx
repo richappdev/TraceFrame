@@ -47,7 +47,7 @@ export default async function TripDetailPage({
   }
 
   return <TripEditor
-    trip={hydrateTrip(trip)}
+    trip={await hydrateTrip(trip)}
     locale={locale}
     justCreated={created === "1"}
     sourceTemplate={trip.sourceTemplate ?? template}

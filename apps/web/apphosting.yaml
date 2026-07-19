@@ -49,3 +49,7 @@ env:
     secret: BANGUMI_REDIRECT_URI
     availability:
       - RUNTIME
+  - variable: PRESENCE_DRAIN_SECRET
+    secret: PRESENCE_DRAIN_SECRET
+    availability:
+      - RUNTIME

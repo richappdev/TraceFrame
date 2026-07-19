@@ -18,9 +18,33 @@ const steps = [
   },
 ];
 
-export default function HomePage() {
+const authErrors: Record<string, string> = {
+  exchange_failed: "Bangumi 暫時無法完成登入，請再試一次。",
+  profile_failed: "登入已授權，但暫時無法讀取 Bangumi 帳號資料。",
+  storage_failed: "登入已授權，但目前無法儲存帳號資料，請稍後再試。",
+  session_failed: "無法建立登入工作階段，請稍後再試。",
+  bad_state: "登入驗證已過期或無效，請重新登入。",
+  missing_code: "Bangumi 沒有回傳登入授權碼，請重新登入。",
+  not_configured: "Bangumi 登入尚未完成設定。",
+  error: "Bangumi 已取消或拒絕這次登入。",
+};
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ auth?: string }>;
+}) {
+  const { auth } = await searchParams;
+  const authError = auth ? authErrors[auth] : undefined;
+
   return (
     <div className="landing">
+      {authError ? (
+        <aside className="auth-error" role="alert">
+          <span>{authError}</span>
+          <Link href="/api/auth/bangumi">重新登入 Bangumi</Link>
+        </aside>
+      ) : null}
       <section className="home-hero">
         <div className="hero-copy">
           <p className="eyebrow"><span>ANIME PILGRIMAGE PLANNER</span><span>出发前的取景框</span></p>

@@ -52,6 +52,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 main { width: 100%; max-width: 1120px; margin: 0 auto; padding: 64px 32px 96px; }
 .landing { margin-top: -8px; }
+.auth-error { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 8px 0 18px; padding: 14px 18px; border: 1px solid color-mix(in srgb, var(--coral) 55%, var(--line)); border-left: 4px solid var(--coral); background: color-mix(in srgb, var(--coral) 9%, var(--surface)); font-size: .88rem; }
+.auth-error a { flex: 0 0 auto; color: var(--coral-dark); font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }
 .home-hero { min-height: 640px; display: grid; grid-template-columns: 1.06fr .94fr; align-items: center; gap: clamp(48px, 7vw, 96px); padding: 34px 0 72px; }
 .eyebrow { margin: 0 0 22px; color: var(--coral-dark); font: 750 .7rem/1.4 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
 .hero-copy > .eyebrow { display: flex; gap: 16px; align-items: center; }
@@ -167,6 +169,7 @@ button:disabled { opacity: .42; cursor: not-allowed; transform: none !important;
   .nav a { padding: 8px 18px; }
   .nav-cta { display: none; }
   main { padding: 40px 20px 88px; }
+  .auth-error { align-items: flex-start; flex-direction: column; gap: 10px; }
   .home-hero { grid-template-columns: 1fr; min-height: 0; padding-top: 20px; }
   .route-board { max-width: 540px; width: 100%; justify-self: center; transform: rotate(.5deg); }
   .section-heading-row { grid-template-columns: 1fr; gap: 20px; }

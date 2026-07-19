@@ -8,3 +8,4 @@ Tracked summaries must include the source artifact name, checksum when available
 
 - [`m0-coverage-2026-07-19.md`](m0-coverage-2026-07-19.md) — canonical Presence reconciliation and top-200 overlap.
 - [`m2-status-2026-07-19.md`](m2-status-2026-07-19.md) — automated implementation preflight and remaining hosted acceptance gates.
+- [`hosted-smoke-2026-07-19.md`](hosted-smoke-2026-07-19.md) — unauthenticated production smoke against `web.app`; locale CDN/`__session` findings and follow-up.

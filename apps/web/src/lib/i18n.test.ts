@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  acceptLanguageFromHeaders,
   detectLocale,
   localeFromCookieHeader,
   localeFromPathname,
+  localeFromSessionCookie,
   localePath,
+  localePreferenceValue,
   localizedTitle,
   localizeCity,
 } from "./i18n";
@@ -15,8 +18,20 @@ describe("i18n helpers", () => {
     expect(detectLocale("en-US")).toBe("zh-CN");
   });
 
-  it("builds locale-prefixed paths and reads the locale cookie", () => {
+  it("prefers Firebase X-Orig-Accept-Language when Accept-Language is rewritten", () => {
+    const headers = new Map([
+      ["accept-language", "zh"],
+      ["x-orig-accept-language", "zh-TW,zh;q=0.9"],
+    ]);
+    expect(detectLocale(acceptLanguageFromHeaders((name) => headers.get(name) ?? null))).toBe("zh-TW");
+  });
+
+  it("builds locale-prefixed paths and reads Firebase-safe locale preference", () => {
     expect(localePath("ja-JP", "/trips/new")).toBe("/ja-JP/trips/new");
+    expect(localePreferenceValue("zh-TW")).toBe("locale:zh-TW");
+    expect(localeFromSessionCookie("locale:zh-TW")).toBe("zh-TW");
+    expect(localeFromSessionCookie("eyJ1c2VyIjox.sig")).toBeNull();
+    expect(localeFromCookieHeader("a=1; __session=locale:zh-TW")).toBe("zh-TW");
     expect(localeFromCookieHeader("a=1; traceframe_locale=zh-TW")).toBe("zh-TW");
     expect(localeFromPathname("/ja-JP/trips/new")).toBe("ja-JP");
   });

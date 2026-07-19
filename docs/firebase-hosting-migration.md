@@ -52,6 +52,11 @@ CSRF state and the logged-in session in `__session` (never `antiable_session` /
 `antiable_oauth_state`). Auth responses that set this cookie use
 `Cache-Control: private`.
 
+Anonymous locale preference also uses `__session` as `locale:<Locale>` when no
+auth/OAuth payload is present. Do not use a separate locale cookie — Hosting
+will strip it. Middleware prefers Firebase's `X-Orig-Accept-Language` when the
+CDN rewrites `Accept-Language`.
+
 ## OAuth cutover
 
 Register this callback in the Bangumi application:
@@ -87,13 +92,17 @@ Run revision and Hosting rollbacks can restore the corresponding revision.
 
 ## Release verification
 
-Verify through `https://antiable-traceframe.web.app`, not the direct Cloud Run URL:
+Verify through `https://antiable-traceframe.web.app`, not the direct Cloud Run URL.
+
+Quick unauthenticated smoke: [`docs/hosted-smoke.md`](hosted-smoke.md).  
+Full M2 gate: [`docs/m2-acceptance.md`](m2-acceptance.md).
 
 1. `/api/health` returns 200, reports Firestore production storage, and confirms the Firestore dependency is ready; invalid configuration or an unreadable store returns 503.
-2. Bangumi login, callback, logout, and library synchronization work.
-3. Trips can be created, edited, and opened through public share URLs.
-4. Data remains after a Cloud Run restart or new revision.
-5. Session, CSRF, static asset, and security-header checks pass.
+2. `/` locale negotiation respects `zh-TW` / `zh-CN` / `ja-JP` (including after visiting a locale-prefixed path).
+3. Bangumi login, callback, logout, and library synchronization work.
+4. Trips can be created, edited, and opened through public share URLs (`/t/:token`).
+5. Data remains after a Cloud Run restart or new revision.
+6. Session, CSRF, static asset, and security-header checks pass.
 
 Keep App Hosting running until these checks pass. Retire the `traceframe` App Hosting
 backend only after the Hosting release is stable and rollback is no longer required.

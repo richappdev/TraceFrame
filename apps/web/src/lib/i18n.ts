@@ -1,10 +1,33 @@
 export const locales = ["zh-CN", "zh-TW", "ja-JP"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "zh-CN";
+/** @deprecated Firebase Hosting strips this cookie; locale preference uses `__session`. */
 export const LOCALE_COOKIE = "traceframe_locale";
+/**
+ * Firebase Hosting only forwards `__session` to Cloud Run. Anonymous locale
+ * preference is stored as `locale:<Locale>` in that cookie when no auth/OAuth
+ * payload is present. Must stay edge-safe (no node:crypto).
+ */
+export const SESSION_COOKIE_NAME = "__session";
+export const LOCALE_PREFERENCE_PREFIX = "locale:";
 
 export function isLocale(value: string | null | undefined): value is Locale {
   return locales.includes(value as Locale);
+}
+
+export function localePreferenceValue(locale: Locale): string {
+  return `${LOCALE_PREFERENCE_PREFIX}${locale}`;
+}
+
+export function localeFromSessionCookie(value: string | null | undefined): Locale | null {
+  if (!value?.startsWith(LOCALE_PREFERENCE_PREFIX)) return null;
+  const locale = value.slice(LOCALE_PREFERENCE_PREFIX.length);
+  return isLocale(locale) ? locale : null;
+}
+
+/** Prefer Firebase's preserved client language when the CDN rewrites Accept-Language. */
+export function acceptLanguageFromHeaders(getHeader: (name: string) => string | null): string | null {
+  return getHeader("x-orig-accept-language") ?? getHeader("accept-language");
 }
 
 export function detectLocale(value: string | null | undefined): Locale {
@@ -194,9 +217,12 @@ export function collectionLabel(value: string, locale: Locale): string {
 }
 
 export function localeFromCookieHeader(cookieHeader: string | null): Locale {
-  const value = cookieHeader
+  const parts = cookieHeader
     ?.split(";")
-    .map((part) => part.trim().split("="))
-    .find(([name]) => name === LOCALE_COOKIE)?.[1];
-  return isLocale(value) ? value : defaultLocale;
+    .map((part) => part.trim().split("=")) ?? [];
+  const session = parts.find(([name]) => name === SESSION_COOKIE_NAME)?.[1];
+  const fromSession = localeFromSessionCookie(session);
+  if (fromSession) return fromSession;
+  const legacy = parts.find(([name]) => name === LOCALE_COOKIE)?.[1];
+  return isLocale(legacy) ? legacy : defaultLocale;
 }

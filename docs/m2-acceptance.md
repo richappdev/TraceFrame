@@ -2,6 +2,8 @@
 
 M2 is complete only when every required item is checked through the Firebase Hosting URL backed by Cloud Run. “Implemented” is not “released.” Record the URL, tester, date, and evidence links at the bottom.
 
+For a short unauthenticated reachability pass first, use [`hosted-smoke.md`](hosted-smoke.md). Smoke pass alone does not change Result below.
+
 ## 1. Configuration and durable storage
 
 - [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured in Secret Manager and attached to Cloud Run.

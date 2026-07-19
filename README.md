@@ -69,7 +69,7 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 
 - **E0–E3 implementation** — code complete; this is not a release claim.
 - **Presence inventory** — 14 reconciled IDs as of 2026-07-18; the older 15-ID coverage report is superseded.
-- **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md).
+- **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md). Operator smoke checklist: [`docs/hosted-smoke.md`](docs/hosted-smoke.md).
 - **Firebase** — project `antiable-traceframe` (display: Traceframe); Firebase Hosting fronts Cloud Run in `asia-east1`
 - **Canonical app/OAuth host** — `https://antiable-traceframe.web.app`; alternate App Hosting links redirect OAuth start to this host.
 - **Production data** — Firestore required; local SQLite is development-only.

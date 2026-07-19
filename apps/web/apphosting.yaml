@@ -1,4 +1,6 @@
-# Settings for Cloud Run behind Firebase App Hosting
+# Rollback settings for Cloud Run behind Firebase App Hosting.
+# OAuth remains canonical on https://antiable-traceframe.web.app; alternate
+# hosts redirect OAuth start there before setting the state cookie.
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
@@ -11,7 +13,7 @@ runConfig:
 # Standalone Next.js server.
 # Monorepo tracing emits apps/web/server.js; isolated app emits server.js at standalone root.
 scripts:
-  runCommand: node .next/standalone/apps/web/server.js
+  runCommand: node .next/standalone/apps/web/start-production.mjs
 
 env:
   - variable: NODE_ENV

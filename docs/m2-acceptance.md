@@ -5,14 +5,14 @@ M2 is complete only when every required item is checked through the Firebase Hos
 ## 1. Configuration and durable storage
 
 - [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured in Secret Manager and attached to Cloud Run.
-- [ ] Hosted runtime reports `APP_STORE=firestore`; production startup refuses local SQLite.
+- [ ] Production startup validates `APP_STORE=firestore`, all OAuth variables, the canonical HTTPS callback, and a 32+ character session secret; `/api/health` also proves a Firestore read and returns 503 when not ready.
 - [ ] Firestore exists in the deployment project and the `traceframe-web` Cloud Run service account can read/write it.
 - [ ] A saved trip and public share link still work after a redeploy or instance restart.
 - [ ] Firestore export/restore ownership and schedule are recorded in `docs/firestore-operations.md`.
 
 ## 2. OAuth and session security
 
-- [ ] Bangumi callback exactly matches the hosted `/api/auth/callback` URL.
+- [ ] Bangumi callback exactly matches `https://antiable-traceframe.web.app/api/auth/callback`; OAuth starts on alternate/rollback hosts redirect to the canonical host before setting state.
 - [ ] OAuth rejects missing, modified, expired, and replayed `state` values.
 - [ ] Session cookie is named `__session` (Firebase Hosting requirement), `httpOnly`, `Secure` in production, `SameSite=Lax`, signed with HMAC, and expires after 30 days.
 - [ ] Missing or weak production `SESSION_SECRET` prevents startup.
@@ -30,7 +30,7 @@ M2 is complete only when every required item is checked through the Firebase Hos
 ## 4. Trip integrity and authorization
 
 - [ ] Create accepts 1–3 days, no more than 50 unique valid subject IDs, and an 80-character title.
-- [ ] Empty, duplicate, malformed, oversized (>64 KiB), and unmapped inputs return safe 4xx errors.
+- [ ] JSON API requests return safe 4xx errors for empty, duplicate, malformed, unsupported-media-type, oversized (>64 KiB actual streamed body, including chunked/no-length requests), and unmapped inputs; HTML form submissions use safe no-echo error states.
 - [ ] Owner can list, rename, reorder, and read their trips.
 - [ ] A different logged-in user cannot read or PATCH an owner trip.
 - [ ] Anonymous access to `/api/trips/:id` is forbidden without the correct share token.
@@ -54,7 +54,7 @@ M2 is complete only when every required item is checked through the Firebase Hos
 
 ## 7. Quality and operations
 
-- [ ] `npm run test`, `npm run typecheck`, and `npm run build` pass.
+- [x] `npm run test` (46 tests), `npm run typecheck`, `npm run lint`, and `npm run build` pass locally on 2026-07-19.
 - [ ] Mobile widths, keyboard navigation, focus visibility, and labels are manually checked.
 - [ ] `/api/health` succeeds and identifies the release as `implemented-awaiting-acceptance` until this checklist passes.
 - [ ] Error logs do not contain OAuth tokens, session cookies, or personal collection payloads.
@@ -73,3 +73,5 @@ M2 is complete only when every required item is checked through the Firebase Hos
 | Result | **OPEN** |
 
 E4 remains blocked until Result is changed to **PASS**.
+
+Raw `reports/` artifacts remain ignored because browser smoke output may contain personal data, OAuth state, or active share URLs. Record sanitized, non-secret acceptance summaries under `docs/evidence/` and link external screenshots from access-controlled storage.

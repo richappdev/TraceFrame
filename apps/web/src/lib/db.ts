@@ -12,6 +12,8 @@ export function getAppDbPath(): string {
 class SqliteAppStoreAdapter implements AppStoreBackend {
   constructor(private readonly store: AppStore) {}
 
+  async healthCheck() { this.store.getUser("__health__"); }
+
   async upsertUser(...args: Parameters<AppStore["upsertUser"]>) { this.store.upsertUser(...args); }
   async getUser(...args: Parameters<AppStore["getUser"]>) { return this.store.getUser(...args); }
   async replaceLibrary(...args: Parameters<AppStore["replaceLibrary"]>) { this.store.replaceLibrary(...args); }

@@ -32,4 +32,4 @@ COPY --from=builder --chown=node:node /workspace/apps/web/.next/standalone/ ./
 USER node
 EXPOSE 8080
 
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "apps/web/start-production.mjs"]

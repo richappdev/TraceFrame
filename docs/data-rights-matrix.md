@@ -15,7 +15,8 @@ This is an engineering policy, not legal advice. A qualified reviewer or written
 
 ## Release rules
 
-1. A Cloudflare 403 or challenge ends the refresh run. Do not rotate egress to continue enumeration.
+1. A 403, 429, Cloudflare page, or HTML challenge ends the refresh run. Do not rotate proxy/egress, spoof browser identities, or resume automatically.
 2. Refresh only a bounded, curated candidate set; cache results and identify the client.
-3. Do not fetch `/points/detail`, full-resolution screenshots, or build offline packs in M2.
-4. Any commercial feature requires a dated decision record naming the reviewer and evidence.
+3. The retained verifier must be sequential, use a fixed identifying User-Agent, and terminate the whole process on 403, 429, or an HTML challenge. Proxy rotation, egress changes, browser fingerprint spoofing, neighborhood expansion, and random ID bands are prohibited.
+4. Do not fetch `/points/detail`, full-resolution screenshots, or build offline packs in M2.
+5. Any commercial feature requires a dated decision record naming the reviewer and evidence.

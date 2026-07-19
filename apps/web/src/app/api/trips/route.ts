@@ -8,9 +8,9 @@ import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
 import { hydrateTrip } from "@/lib/trips";
 import {
   TripInputError,
-  assertReasonableRequestSize,
   normalizeSubjectIds,
   normalizeTripTitle,
+  readBoundedRequestText,
 } from "@/lib/trip-validation";
 
 export const runtime = "nodejs";
@@ -21,18 +21,19 @@ function parseSubjectIdsFromBody(body: unknown): number[] {
   return normalizeSubjectIds(raw);
 }
 
-async function parseCreateInput(request: Request): Promise<{
+async function parseCreateInput(request: Request, rawBody: string): Promise<{
   title: string;
   subjectIds: number[];
   dayCount: number;
 }> {
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
-    const body = (await request.json()) as {
-      title?: string;
-      subjectIds?: unknown;
-      dayCount?: unknown;
-    };
+    let body: { title?: string; subjectIds?: unknown; dayCount?: unknown };
+    try {
+      body = JSON.parse(rawBody) as typeof body;
+    } catch {
+      throw new TripInputError("invalid_json");
+    }
     return {
       title: normalizeTripTitle(body.title),
       subjectIds: parseSubjectIdsFromBody(body),
@@ -40,7 +41,10 @@ async function parseCreateInput(request: Request): Promise<{
     };
   }
 
-  const form = await request.formData();
+  if (!contentType.includes("application/x-www-form-urlencoded")) {
+    throw new TripInputError("unsupported_media_type", 415);
+  }
+  const form = new URLSearchParams(rawBody);
   const ids = normalizeSubjectIds(form.getAll("subjectId"));
   return {
     title: normalizeTripTitle(form.get("title")),
@@ -86,8 +90,8 @@ export async function POST(request: Request) {
     (request.headers.get("accept") ?? "").includes("text/html");
 
   try {
-    assertReasonableRequestSize(request);
-    const input = await parseCreateInput(request);
+    const rawBody = await readBoundedRequestText(request);
+    const input = await parseCreateInput(request, rawBody);
     if (input.subjectIds.length === 0) {
       if (wantsHtml) {
         return NextResponse.redirect(absoluteUrl(request, "/trips/new?error=empty"), 303);

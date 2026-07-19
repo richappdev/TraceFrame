@@ -62,6 +62,10 @@ export class FirestoreAppStore implements AppStoreBackend {
     this.db = getFirestore(app);
   }
 
+  async healthCheck(): Promise<void> {
+    await this.db.collection(USERS).limit(1).get();
+  }
+
   async upsertUser(user: UserRow): Promise<void> {
     await this.db.collection(USERS).doc(user.id).set(user, { merge: true });
   }

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-AniTabi API Advanced Probe Agent
-Description: High-performance, stealthy, and distributed API detector for AniTabi platform.
-Seeds candidate Bangumi subject IDs from Bangumi ranked anime + local seeds + neighborhood.
-Author: AI Collaborative Agent
-Year: 2026
+"""Bounded Anitabi /lite presence verifier.
+
+The verifier uses a fixed identifying client, probes sequentially, and stops the
+entire run on the first anti-abuse response. It must not be used for broad
+enumeration or with rotating egress.
 """
 
 from __future__ import annotations
@@ -15,57 +14,33 @@ import asyncio
 import csv
 import logging
 import random
-import time
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Set
+from typing import List, Sequence, Set
 
 import aiohttp
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# === Safety / rate config (align with valid-id-list.md: < 100 req/min) ===
-CONCURRENCY_LIMIT = 3
-PROBE_DELAY_MIN = 0.4
-PROBE_DELAY_MAX = 1.2
-IP_ROTATION_INTERVAL = 180
+# === Safety / rate config (align with valid-id-list.md) ===
+PROBE_DELAY_MIN = 1.5
+PROBE_DELAY_MAX = 3.0
+DEFAULT_MAX_CANDIDATES = 250
 
 BANGUMI_API = "https://api.bgm.tv"
 BANGUMI_UA = "antiable/probe-agent"
+ANITABI_UA = "antiable/probe-agent"
 SUBJECT_TYPE_ANIME = 2
 BANGUMI_PAGE_SIZE = 50  # API max
 
-PROXY_POOL = [
-    None,  # local egress by default
-    # "http://user:pass@tokyo-proxy.example.com:8080",
-]
-
-# Browser-like UAs for Anitabi (header polymorphism against WAF)
-ANITABI_USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
-]
-
-# Known pilgrimage titles (stable seeds)
+# Canonical reconciled registry from valid-ids.csv (2026-07-18).
 SEED_SUBJECT_IDS = [
-    428735, 115908, 364450, 244243, 265, 374410, 411364,
-    237176, 347432, 258611, 322234, 5424, 240562, 383344, 126461,
+    1424, 22759, 110467, 115908, 207195, 240038, 240562,
+    269235, 328609, 333158, 364450, 378862, 428735, 431767,
 ]
 
 
-def expand_neighborhood(ids: Iterable[int], radius: int) -> List[int]:
-    """Expand each ID by ±radius (inclusive) for local Bangumi ID scanning."""
-    if radius <= 0:
-        return sorted(set(int(i) for i in ids if int(i) > 0))
-    out: Set[int] = set()
-    for sid in ids:
-        sid = int(sid)
-        for offset in range(-radius, radius + 1):
-            candidate = sid + offset
-            if candidate > 0:
-                out.add(candidate)
-    return sorted(out)
+class ProbeHalted(RuntimeError):
+    """The upstream requested that the entire verification run stop."""
 
 
 async def fetch_bangumi_ranked_ids(
@@ -144,23 +119,19 @@ async def fetch_bangumi_ranked_ids(
 def build_probe_id_list(
     bangumi_ids: Sequence[int],
     seed_ids: Sequence[int],
-    neighborhood: int,
-    include_exploration: bool,
-    exploration_start: int = 400000,
-    exploration_count: int = 100,
+    max_candidates: int,
 ) -> List[int]:
-    """Merge Bangumi ranked + seeds, then expand neighborhood (+ optional random band)."""
-    base = list(dict.fromkeys([*seed_ids, *bangumi_ids]))  # preserve order, unique
-    ids = expand_neighborhood(base, neighborhood)
-    if include_exploration:
-        band = list(range(exploration_start, exploration_start + exploration_count))
-        ids = sorted(set(ids).union(band))
+    """Merge canonical seeds and ranked candidates, preserving order and a hard cap."""
+    ids = [
+        sid
+        for sid in dict.fromkeys([*seed_ids, *bangumi_ids])
+        if isinstance(sid, int) and sid > 0
+    ][:max_candidates]
     logging.info(
-        "Probe ID list built: seeds=%s bangumi=%s neighborhood=%s exploration=%s -> %s ids",
+        "Bounded candidate list built: seeds=%s bangumi=%s cap=%s -> %s ids",
         len(seed_ids),
         len(bangumi_ids),
-        neighborhood,
-        include_exploration,
+        max_candidates,
         len(ids),
     )
     return ids
@@ -170,63 +141,76 @@ class AniTabiProbeAgent:
     def __init__(self, ids_to_probe: Sequence[int], output_csv: Path):
         self.ids = list(ids_to_probe)
         self.valid_results = []
-        self.start_time = time.time()
         self.output_csv = output_csv
 
-    def get_current_proxy(self) -> Optional[str]:
-        elapsed = time.time() - self.start_time
-        proxy_index = int(elapsed // IP_ROTATION_INTERVAL) % len(PROXY_POOL)
-        return PROXY_POOL[proxy_index]
+    async def probe_id(self, session: aiohttp.ClientSession, subject_id: int):
+        await asyncio.sleep(random.uniform(PROBE_DELAY_MIN, PROBE_DELAY_MAX))
+        url = f"https://api.anitabi.cn/bangumi/{subject_id}/lite"
+        headers = {
+            "User-Agent": ANITABI_UA,
+            "Accept": "application/json",
+        }
 
-    async def probe_id(self, session: aiohttp.ClientSession, subject_id: int, semaphore: asyncio.Semaphore):
-        async with semaphore:
-            await asyncio.sleep(random.uniform(PROBE_DELAY_MIN, PROBE_DELAY_MAX))
+        try:
+            async with session.get(url, headers=headers, timeout=10) as response:
+                content_type = response.headers.get("Content-Type", "").lower()
+                if response.status in (403, 429):
+                    body = (await response.text())[:200]
+                    raise ProbeHalted(
+                        f"upstream anti-abuse response status={response.status} "
+                        f"id={subject_id} body={body!r}"
+                    )
+                if response.status != 200:
+                    return None
+                if "json" not in content_type:
+                    body = (await response.text())[:200]
+                    if "<html" in body.lower() or "cloudflare" in body.lower() or "challenge" in body.lower():
+                        raise ProbeHalted(
+                            f"upstream challenge response id={subject_id} body={body!r}"
+                        )
+                    logging.warning(
+                        "Unexpected non-JSON response id=%s content-type=%s",
+                        subject_id,
+                        content_type,
+                    )
+                    return None
 
-            url = f"https://api.anitabi.cn/bangumi/{subject_id}/lite"
-            proxy = self.get_current_proxy()
-            headers = {
-                "User-Agent": random.choice(ANITABI_USER_AGENTS),
-                "Accept": "application/json, text/plain, */*",
-                "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Referer": "https://www.anitabi.cn/map",
-            }
-
-            try:
-                async with session.get(url, headers=headers, proxy=proxy, timeout=6) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        points_len = data.get("pointsLength", 0)
-                        if points_len > 0:
-                            result = {
-                                "ID": subject_id,
-                                "cn_name": data.get("cn", "未知"),
-                                "origin_name": data.get("title", "未知"),
-                                "city": data.get("city", "未知"),
-                                "points": points_len,
-                                "images": data.get("imagesLength", 0),
-                            }
-                            logging.info(
-                                "🟢 [valid] %s - %s (points: %s)",
-                                subject_id,
-                                result["cn_name"],
-                                points_len,
-                            )
-                            return result
-                    elif response.status == 429:
-                        logging.warning("⚠️ rate limited (429) — slow down or rotate proxy")
-                    elif response.status == 403:
-                        logging.warning("⚠️ blocked (403) on id=%s — rotate egress", subject_id)
-            except Exception:
-                pass
+                data = await response.json()
+                points_len = data.get("pointsLength", 0)
+                if points_len <= 0:
+                    return None
+                result = {
+                    "ID": subject_id,
+                    "cn_name": data.get("cn", "未知"),
+                    "origin_name": data.get("title", "未知"),
+                    "city": data.get("city", "未知"),
+                    "points": points_len,
+                    "images": data.get("imagesLength", 0),
+                }
+                logging.info(
+                    "🟢 [valid] %s - %s (points: %s)",
+                    subject_id,
+                    result["cn_name"],
+                    points_len,
+                )
+                return result
+        except ProbeHalted:
+            raise
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            logging.warning("Probe request failed id=%s: %s", subject_id, exc)
             return None
 
     async def run(self):
         logging.info("AniTabi probe starting. targets=%s", len(self.ids))
-        semaphore = asyncio.Semaphore(CONCURRENCY_LIMIT)
-        async with aiohttp.ClientSession() as session:
-            tasks = [self.probe_id(session, sid, semaphore) for sid in self.ids]
-            results = await asyncio.gather(*tasks)
-            self.valid_results = [r for r in results if r is not None]
+        try:
+            async with aiohttp.ClientSession() as session:
+                for sid in self.ids:
+                    result = await self.probe_id(session, sid)
+                    if result is not None:
+                        self.valid_results.append(result)
+        except ProbeHalted:
+            self.save_to_csv()
+            raise
         self.save_to_csv()
 
     def save_to_csv(self):
@@ -265,14 +249,13 @@ async def collect_seed_ids(args: argparse.Namespace) -> List[int]:
     return build_probe_id_list(
         bangumi_ids=bangumi_ids,
         seed_ids=SEED_SUBJECT_IDS,
-        neighborhood=args.neighborhood,
-        include_exploration=args.exploration,
+        max_candidates=args.max_candidates,
     )
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Probe Anitabi /lite using Bangumi ranked anime IDs + seeds + neighborhood."
+        description="Verify a bounded Anitabi /lite candidate set and stop on anti-abuse responses."
     )
     parser.add_argument(
         "--pages",
@@ -293,20 +276,15 @@ def parse_args() -> argparse.Namespace:
         help="Bangumi browse sort (default: rank)",
     )
     parser.add_argument(
-        "--neighborhood",
-        type=int,
-        default=3,
-        help="Expand each seed/ranked ID by ±N for local probing (default: 3)",
-    )
-    parser.add_argument(
         "--no-bangumi",
         action="store_true",
-        help="Skip Bangumi API; use SEED_SUBJECT_IDS (+ neighborhood) only",
+        help="Skip Bangumi API; verify only the canonical SEED_SUBJECT_IDS",
     )
     parser.add_argument(
-        "--exploration",
-        action="store_true",
-        help="Also include the legacy 400000–400099 exploration band",
+        "--max-candidates",
+        type=lambda value: max(1, min(int(value), 500)),
+        default=DEFAULT_MAX_CANDIDATES,
+        help=f"Hard cap for the candidate set (default {DEFAULT_MAX_CANDIDATES}, max 500)",
     )
     parser.add_argument(
         "--dump-seeds",
@@ -336,7 +314,11 @@ async def amain() -> None:
         print(f"candidates={len(ids)}")
         return
     agent = AniTabiProbeAgent(ids, Path(args.output))
-    await agent.run()
+    try:
+        await agent.run()
+    except ProbeHalted as exc:
+        logging.error("Entire probe run stopped: %s", exc)
+        raise SystemExit(2) from exc
 
 
 if __name__ == "__main__":

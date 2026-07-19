@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build && node ./scripts/prepare-standalone.mjs",
     "apphosting:build": "next build && node ./scripts/prepare-standalone.mjs",
-    "start": "node .next/standalone/apps/web/server.js",
+    "start": "node .next/standalone/apps/web/start-production.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

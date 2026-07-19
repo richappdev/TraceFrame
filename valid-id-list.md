@@ -20,17 +20,17 @@ Machine-readable source of truth: [`valid-ids.csv`](./valid-ids.csv)
 
 | # | Rule |
 |---|---|
-| 1 | **&lt; 100 requests / minute**, with **random gaps** between requests |
-| 2 | Regression / collect window as requested (e.g. 3 min or 10 min) |
-| 3 | Use smarter IDs (Bangumi ranked + seeds + neighborhood), not pure random |
+| 1 | Sequential requests with randomized **1.5–3 second gaps** and a fixed identifying User-Agent |
+| 2 | Hard candidate cap: default 250, never more than 500 |
+| 3 | Use canonical seeds plus bounded Bangumi-ranked candidates; no neighborhood expansion or random bands |
 | 4 | Log security signals (`403`/`429`, Cloudflare HTML, latency, `CF-RAY`) |
-| 5 | On the first Cloudflare challenge or sustained `403`, **stop the entire run** and cool down. Do not rotate egress to continue enumeration. |
+| 5 | On the first `403`, `429`, Cloudflare page, or HTML challenge, **stop the entire run**. Do not rotate proxy/egress, spoof browser identities, or resume automatically. |
 | 6 | Resume only with a bounded curated set or an approved partner/bulk-data mechanism. |
 | 7 | Save each approved run under `probe-testing/<yyyyMMdd-HHmmss>/` and merge valids into `valid-ids.csv`. |
 
 ## After every probe run
 
-1. Probe results live under `probe-testing/<yyyyMMdd-HHmmss>/`.
+1. Generated probe results live under `probe-testing/<yyyyMMdd-HHmmss>/`; raw smoke reports stay ignored if they contain personal data, OAuth state, or share URLs.
 2. Open that run’s `anitabi-valid-ids.csv`.
 3. For each valid `id`:
    - **New id** → append a row to `valid-ids.csv` (set `firstSeenAt` = `lastVerifiedAt` = probe time, `sourceRun` = folder name).

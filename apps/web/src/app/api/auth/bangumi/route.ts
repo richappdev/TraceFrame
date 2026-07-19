@@ -56,9 +56,15 @@ export function GET(request: Request) {
     );
   }
 
-  // Prefer the public origin of this request so the state cookie host matches
-  // the callback host (preview vs prod App Hosting URLs).
-  const redirectUri = `${getRequestOrigin(request)}/api/auth/callback`;
+  const canonicalOrigin = new URL(configuredRedirect).origin;
+  const requestOrigin = getRequestOrigin(request);
+  if (process.env.NODE_ENV === "production" && requestOrigin !== canonicalOrigin) {
+    return NextResponse.redirect(new URL("/api/auth/bangumi", canonicalOrigin), 307);
+  }
+
+  // Use the one callback registered with Bangumi. Alternate/rollback hosts are
+  // redirected above so the temporary state cookie is created on this host.
+  const redirectUri = configuredRedirect;
   const state = createOAuthState(redirectUri);
   const url = buildAuthorizeUrl(state, redirectUri);
   if (!url.includes("redirect_uri=")) {

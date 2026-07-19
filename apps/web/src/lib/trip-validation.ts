@@ -18,8 +18,38 @@ export function assertReasonableRequestSize(request: Request): void {
   const raw = request.headers.get("content-length");
   if (!raw) return;
   const bytes = Number(raw);
-  if (Number.isFinite(bytes) && bytes > MAX_TRIP_REQUEST_BYTES) {
+  if (!Number.isFinite(bytes) || bytes < 0) {
+    throw new TripInputError("invalid_content_length");
+  }
+  if (bytes > MAX_TRIP_REQUEST_BYTES) {
     throw new TripInputError("payload_too_large", 413);
+  }
+}
+
+/** Read and enforce the actual body size, including chunked/no-length requests. */
+export async function readBoundedRequestText(request: Request): Promise<string> {
+  assertReasonableRequestSize(request);
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let bytes = 0;
+  let text = "";
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > MAX_TRIP_REQUEST_BYTES) {
+        await reader.cancel("payload_too_large");
+        throw new TripInputError("payload_too_large", 413);
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+    return text;
+  } finally {
+    reader.releaseLock();
   }
 }
 

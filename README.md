@@ -12,7 +12,7 @@ Engineering plan: [Notion — Implementation plan](https://app.notion.com/p/Impl
 | `packages/bangumi` | Bangumi HTTP client (UA + ranked + subject cache) |
 | `packages/anitabi` | Anitabi `/lite` client + rate limiter + map deep-link helpers |
 | `packages/presence` | SQLite presence index + CSV import + coverage report |
-| `tools/probe-agent` | Historical probe tooling / seeding patterns |
+| `tools/probe-agent` | Historical bounded verifier; sequential, fixed-UA, stop-on-block only |
 | `valid-ids.csv` | Seed Bangumi IDs with verified Anitabi coverage |
 
 ## Quick start
@@ -45,9 +45,11 @@ Copy `apps/web/.env.example` → `apps/web/.env.local` and fill Bangumi OAuth cr
 | `/privacy` | Stored-data explanation and account deletion |
 | `/data-policy` | License and commercial-use guardrails |
 
-Reports: `reports/coverage-YYYY-MM-DD.{json,md}` · DB: `data/presence.sqlite`
+Generated/raw reports: `reports/` (ignored because smoke artifacts may contain personal data or live tokens) · tracked sanitized evidence: [`docs/evidence/`](docs/evidence/) · DB: `data/presence.sqlite`
 
 Set `SKIP_NETWORK=1` on smoke/coverage for offline CI. If Anitabi returns Cloudflare 403 or a challenge, stop the refresh; smoke may fall back to the curated presence seed. Do not rotate egress to continue enumeration.
+
+The historical verifier is deliberately bounded: canonical seeds plus ranked candidates, maximum 500, sequential 1.5–3 second gaps, a fixed identifying User-Agent, and immediate whole-run termination on 403, 429, or an HTML challenge.
 
 ## License / data policy (MVP)
 
@@ -59,15 +61,18 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 - **Presence inventory** — 14 reconciled IDs as of 2026-07-18; the older 15-ID coverage report is superseded.
 - **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md).
 - **Firebase** — project `antiable-traceframe` (display: Traceframe); Firebase Hosting fronts Cloud Run in `asia-east1`
+- **Canonical app/OAuth host** — `https://antiable-traceframe.web.app`; alternate App Hosting links redirect OAuth start to this host.
 - **Production data** — Firestore required; local SQLite is development-only.
+- **Automated preflight** — 46 unit tests plus lint, workspace typecheck, and production build pass as of 2026-07-19; hosted manual acceptance remains open.
 - **E4+** — blocked until M2 passes and rights/data gates are approved.
 
 Planning records: [`docs/product-validation.md`](docs/product-validation.md) · [`docs/firestore-operations.md`](docs/firestore-operations.md) · [`docs/data-rights-matrix.md`](docs/data-rights-matrix.md)
 
 ## Deploy (Firebase Hosting + Cloud Run)
 
-The production URL is `https://antiable-traceframe.web.app` (with
-`https://antiable-traceframe.firebaseapp.com` as an equivalent alias). Cloud Run and
+The canonical production and OAuth URL is `https://antiable-traceframe.web.app`. The
+`firebaseapp.com` alias and the old App Hosting backend are operational/rollback surfaces,
+not alternate OAuth origins. Cloud Run and
 Firestore require the **Blaze** plan on project `antiable-traceframe`:
 
 https://console.firebase.google.com/project/antiable-traceframe/usage/details

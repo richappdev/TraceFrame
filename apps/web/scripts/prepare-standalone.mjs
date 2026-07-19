@@ -22,19 +22,23 @@ const publicSrc = path.join(root, "public");
 const publicDest = path.join(appDir, "public");
 const seedSrc = path.join(root, "seed");
 const seedDest = path.join(appDir, "seed");
+const startSrc = path.join(root, "scripts", "start-production.mjs");
+const startDest = path.join(appDir, "start-production.mjs");
 
 mkdirSync(path.join(appDir, ".next"), { recursive: true });
 if (existsSync(staticSrc)) cpSync(staticSrc, staticDest, { recursive: true });
 if (existsSync(publicSrc)) cpSync(publicSrc, publicDest, { recursive: true });
 if (existsSync(seedSrc)) cpSync(seedSrc, seedDest, { recursive: true });
+cpSync(startSrc, startDest);
 
 const rel = path.relative(root, serverJs).replace(/\\/g, "/");
 console.log(
   JSON.stringify({
     ok: true,
     serverJs: rel,
-    runCommand: `node ${rel}`,
+    runCommand: `node ${path.relative(root, startDest).replace(/\\/g, "/")}`,
     staticCopied: existsSync(staticDest),
     seedCopied: existsSync(seedDest),
+    startupValidationCopied: existsSync(startDest),
   }),
 );

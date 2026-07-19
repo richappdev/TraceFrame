@@ -1,13 +1,15 @@
 # Firebase Hosting migration
 
-The production entry point is Firebase Hosting at:
+The canonical production and OAuth entry point is Firebase Hosting at:
 
 - `https://antiable-traceframe.web.app`
-- `https://antiable-traceframe.firebaseapp.com` (equivalent alias)
+- `https://antiable-traceframe.firebaseapp.com` (hosting alias; not an OAuth origin)
 
 Firebase Hosting rewrites all requests to the `traceframe-web` Cloud Run service in
 `asia-east1`. The existing `traceframe` App Hosting backend and `apps/web/apphosting.yaml`
 remain available temporarily for rollback.
+
+OAuth is single-origin: `BANGUMI_REDIRECT_URI` is the canonical `web.app` callback. Starting OAuth on an alternate alias or the rollback App Hosting host redirects to the canonical `/api/auth/bangumi` endpoint before the state cookie is created.
 
 ## One-time setup
 
@@ -87,7 +89,7 @@ Run revision and Hosting rollbacks can restore the corresponding revision.
 
 Verify through `https://antiable-traceframe.web.app`, not the direct Cloud Run URL:
 
-1. `/api/health` reports Firestore production storage.
+1. `/api/health` returns 200, reports Firestore production storage, and confirms the Firestore dependency is ready; invalid configuration or an unreadable store returns 503.
 2. Bangumi login, callback, logout, and library synchronization work.
 3. Trips can be created, edited, and opened through public share URLs.
 4. Data remains after a Cloud Run restart or new revision.

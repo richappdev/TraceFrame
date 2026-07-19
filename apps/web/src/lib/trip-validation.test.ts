@@ -6,6 +6,7 @@ import {
   normalizeSubjectIds,
   normalizeTripDays,
   normalizeTripTitle,
+  readBoundedRequestText,
 } from "./trip-validation";
 
 describe("trip input validation", () => {
@@ -29,5 +30,32 @@ describe("trip input validation", () => {
       headers: { "content-length": String(MAX_TRIP_REQUEST_BYTES + 1) },
     });
     expect(() => assertReasonableRequestSize(request)).toThrowError("payload_too_large");
+  });
+
+  it("rejects an oversized body without relying on Content-Length", async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(MAX_TRIP_REQUEST_BYTES));
+        controller.enqueue(new Uint8Array([1]));
+        controller.close();
+      },
+    });
+    const request = new Request("https://example.test/api/trips", {
+      method: "POST",
+      body: stream,
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+    await expect(readBoundedRequestText(request)).rejects.toMatchObject({
+      code: "payload_too_large",
+      status: 413,
+    });
+  });
+
+  it("reads a bounded request body", async () => {
+    const request = new Request("https://example.test/api/trips", {
+      method: "POST",
+      body: JSON.stringify({ title: "京都" }),
+    });
+    await expect(readBoundedRequestText(request)).resolves.toBe('{"title":"京都"}');
   });
 });

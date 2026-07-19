@@ -9,6 +9,7 @@ export interface TripPatch {
 }
 
 export interface AppStoreBackend {
+  healthCheck(): Promise<void>;
   upsertUser(user: UserRow): Promise<void>;
   getUser(id: string): Promise<UserRow | null>;
   replaceLibrary(userId: string, items: LibraryItemRow[]): Promise<void>;

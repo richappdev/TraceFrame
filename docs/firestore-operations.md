@@ -4,7 +4,8 @@
 
 - Local development: SQLite through the default app store adapter.
 - Firebase Hosting + Cloud Run: `APP_STORE=firestore` is mandatory in the Cloud Run service.
-- Production startup fails if Firestore is not selected, preventing accidental use of ephemeral container storage.
+- The production server entrypoint validates Firestore selection and required auth/session configuration before importing the Next server, preventing accidental use of ephemeral container storage.
+- `/api/health` performs a real Firestore read; connectivity or permission failures return `503 runtime_not_ready` rather than a false-positive 200.
 - Presence remains a rebuildable SQLite seed under `/tmp`; user, library, and trip data do not.
 
 ## Deployment verification

@@ -7,9 +7,9 @@ import { hydrateTrip } from "@/lib/trips";
 import { isTrustedMutationOrigin } from "@/lib/request-origin";
 import {
   TripInputError,
-  assertReasonableRequestSize,
   normalizeTripDays,
   normalizeTripTitle,
+  readBoundedRequestText,
 } from "@/lib/trip-validation";
 
 export const runtime = "nodejs";
@@ -68,21 +68,42 @@ export async function PATCH(request: Request, ctx: Ctx) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
 
-    const body = (await request.json()) as {
+    if (!(request.headers.get("content-type") ?? "").includes("application/json")) {
+      throw new TripInputError("unsupported_media_type", 415);
+    }
+    const rawBody = await readBoundedRequestText(request);
+    let body: {
       title?: string;
       days?: TripDay[];
       shareAction?: "rotate" | "revoke";
     };
+    try {
+      body = JSON.parse(rawBody) as typeof body;
+    } catch {
+      throw new TripInputError("invalid_json");
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      throw new TripInputError("invalid_json");
+    }
+    if (
+      body.shareAction !== undefined &&
+      body.shareAction !== "rotate" &&
+      body.shareAction !== "revoke"
+    ) {
+      throw new TripInputError("invalid_share_action");
+    }
+    if (body.title === undefined && body.days === undefined && body.shareAction === undefined) {
+      throw new TripInputError("no_changes");
+    }
 
     let daysJson: string | undefined;
     let subjectIdsJson: string | undefined;
-    if (Array.isArray(body.days)) {
+    if (body.days !== undefined) {
       const days = normalizeTripDays(body.days);
       daysJson = JSON.stringify(days);
       subjectIdsJson = JSON.stringify([...new Set(days.flatMap((d) => d.subjectIds))]);
     }
 
-    assertReasonableRequestSize(request);
     const shareToken =
       body.shareAction === "rotate"
         ? randomBytes(24).toString("base64url")

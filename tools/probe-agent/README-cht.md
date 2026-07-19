@@ -1,87 +1,58 @@
-# AniTabi API Probe Agent Reference
+# AniTabi 有界 Presence 驗證工具
 
-本文件定義了針對動漫巡禮地圖平台 `anitabi.cn` 進行大規模、高安全性、防封鎖逆向探測的技術邏輯與策略，供 AI Agent 進行架構理解與代碼調用。
+此工具只用 Anitabi 輕量 `/lite` 端點，驗證一組有上限的 Bangumi subject ID。它是保留給受控更新的歷史研究工具，不是爬蟲或大量列舉工具。
 
-## 🎯 探測目標
-在不破壞目標網站可用性、不觸發安全 WAF（如騰訊 EdgeOne 或 Cloudflare）防護的前提下，批次偵測並過濾出「真正含有聖地巡禮地標」的有效動畫 ID（基於 Bangumi Subject ID）。
+## 強制操作規則
 
----
+1. 只使用 canonical seeds 與有上限的 Bangumi 排名候選集。
+2. 逐筆發送請求，間隔隨機 1.5–3 秒，並使用固定且可識別的 `User-Agent`。
+3. 第一次遇到 HTTP 403、HTTP 429、Cloudflare 頁面或 HTML challenge 時，立即停止整個 run。
+4. 禁止輪替 proxy、切換出口、偽裝瀏覽器身分，或被阻擋後自動續跑。
+5. 快取結果；任何命中在寫入 `valid-ids.csv` 前，都必須再與 Bangumi 對帳。
+6. 若需要大量資料，優先取得書面合作或 bulk-data 機制。
 
-## 🧠 核心探測思維 (Core Mindset)
+## API 與判定規則
 
-### 1. 輕量化探測 (Lite Detection)
-* **痛點**：詳細數據端點（`/points/detail`）含有大量高解析度比對圖片連結，高頻請求會耗盡伺服器頻寬，且容易被防火牆標記。
-* **解法**：使用設計極度輕量化的 `lite` 概要端點：
-  `GET https://api.anitabi.cn/bangumi/{subjectID}/lite`
-* **過濾邏輯**：
-  伺服器可能針對未初始化或空地圖的作品回傳 `200 OK`。Agent 必須解析 JSON Payload，確認其中的 `pointsLength` 是否大於 `0`。
+```text
+GET https://api.anitabi.cn/bangumi/{subjectID}/lite
+```
 
-### 2. 微秒級隨機離散 (Micro-Randomization)
-* **痛點**：定時、定頻的請求（例如精準的每 0.5 秒一次）會輕易被 WAF 的統計特徵阻斷。
-* **解法**：使用高斯分佈或均勻分佈（`random.uniform`）將每個請求的時間間隔完全打碎。
+- `200` JSON 且 `pointsLength > 0`：候選作品有 Anitabi presence。
+- `404`：候選不存在。
+- `403`、`429` 或 HTML challenge：停止整個 run；不可當成 ID 判定。
 
-### 3. 動態 IP 輪替 (Proxy Rotation)
-* **痛點**：WAF 會在滑動窗口（Sliding Window）內計算單一 IP 的請求上限（例如單一 IP 每分鐘 500 次）。
-* **解法**：每 3 分鐘強制切換出口代理伺服器。這在防禦計數器逼近臨界點前「金蟬脫殼」，在伺服器端模擬多個異地用戶同時存取的行為。
+## 使用方式
 
-### 4. HTTP 標頭多態性 (Header Polymorphism)
-* **解法**：每一次請求都隨機抽換不同的 `User-Agent` 與 `Accept-Encoding` 組合，隱蔽自動化腳本特徵。
-
-### 5. 智慧種子 ID（Bangumi 排名）
-* **痛點**：在 `1–500000` 盲掃會浪費 Anitabi 配額在沒有巡禮地圖的作品上。
-* **解法**：先從 Bangumi 拉取動畫排名條目，再只對下列 ID 探測 Anitabi：
-  1. 內建已知種子
-  2. Bangumi 動畫排名（`GET https://api.bgm.tv/v0/subjects?type=2&sort=rank`）
-  3. 鄰域擴展（每個種子／排名 ID 的 `±N`）
-* Bangumi 請求使用固定識別 UA（`antiable/probe-agent`）；Anitabi 仍使用多態瀏覽器 UA。
-
----
-
-## 使用方式 (Usage)
-
-### 環境準備
 ```bash
 cd tools/probe-agent
 py -3 -m pip install aiohttp
-```
-可選：在 `probe_agent.py` 填入 `PROXY_POOL`。若池為空／僅 `None`，則使用本機出口並以降頻模式執行。
 
-### 常用指令
-```bash
-# 預設：Bangumi 排名（4×50）+ 種子 + ±3 鄰域 → Anitabi /lite
+# canonical seeds + 最多 200 筆 Bangumi 排名動畫，總候選上限 250。
 py -3 probe_agent.py
 
-# 只拉排名 ID（不打 Anitabi）
-py -3 probe_agent.py --seeds-only --dump-seeds bangumi_ranked_ids.txt
-
-# 更多排名頁／更寬鄰域
-py -3 probe_agent.py --pages 8 --neighborhood 5 --output valid_anitabi_ids.csv
-
-# 僅本地種子（不打 Bangumi）
+# 只驗證 14 筆 canonical reconciled seeds。
 py -3 probe_agent.py --no-bangumi
 
-# 額外包含舊版探索區間 400000–400099
-py -3 probe_agent.py --exploration
+# 只建立候選清單，不呼叫 Anitabi。
+py -3 probe_agent.py --seeds-only --dump-seeds bangumi_ranked_ids.txt
+
+# 使用更小的硬上限。
+py -3 probe_agent.py --max-candidates 50 --output valid_anitabi_ids.csv
 ```
 
-有效結果寫入 `valid_anitabi_ids.csv`（或 `--output`）。
+遇到 anti-abuse response 時，程序會寫出已完成的部分結果並以狀態碼 `2` 結束。中斷的 run 必須人工檢查，不可自動合併。
 
-### CLI 參數
+## CLI 參數
 
 | 參數 | 預設 | 說明 |
-|---|---|---|
-| `--pages` | `4` | 拉取 Bangumi 排名頁數（每頁 `page_size`；預設約 200 部動畫） |
-| `--page-size` | `50` | Bangumi 每頁筆數（API 上限 50） |
+|---|---:|---|
+| `--pages` | `4` | 取得 Bangumi 排名頁數，每頁最多 50 筆 |
+| `--page-size` | `50` | Bangumi 每頁筆數 |
 | `--sort` | `rank` | Bangumi 排序：`rank` 或 `date` |
-| `--neighborhood` | `3` | 每個種子／排名 ID 擴展 `±N` 後再探測 |
-| `--no-bangumi` | 關閉 | 跳過 Bangumi；只用內建種子（+ 鄰域） |
-| `--exploration` | 關閉 | 額外加入 `400000–400099` |
-| `--dump-seeds` | — | 將 Bangumi 排名 ID 寫入文字檔（一行一個） |
-| `--seeds-only` | 關閉 | 只建立候選 ID 列表後結束（不請求 Anitabi） |
-| `--output` | `valid_anitabi_ids.csv` | Anitabi 命中結果 CSV 路徑 |
+| `--no-bangumi` | 關閉 | 只驗證 canonical local seeds |
+| `--max-candidates` | `250` | 候選硬上限；最大允許值為 500 |
+| `--dump-seeds` | — | 輸出 Bangumi 排名 ID 供人工檢查 |
+| `--seeds-only` | 關閉 | 只建立候選，不呼叫 Anitabi |
+| `--output` | `valid_anitabi_ids.csv` | 已驗證命中的 CSV 輸出 |
 
-### 種子流程
-1. `SEED_SUBJECT_IDS` 內建巡禮種子
-2. Bangumi 動畫排名：`GET https://api.bgm.tv/v0/subjects?type=2&sort=rank`
-3. 對合併集合做鄰域擴展
-4. Anitabi lite 探測：`GET https://api.anitabi.cn/bangumi/{id}/lite`（僅保留 `pointsLength > 0`）
+成功完成後，依 [`../../valid-id-list.md`](../../valid-id-list.md) 的 reconciliation 流程處理。全專案以 [`../../docs/data-rights-matrix.md`](../../docs/data-rights-matrix.md) 的資料政策為準。

@@ -21,6 +21,10 @@ export interface LibraryItemRow {
   subjectId: number;
   collectionType: string;
   score: number | null;
+  /** Bangumi subject name (usually Japanese). */
+  title: string | null;
+  /** Bangumi subject name_cn when present. */
+  titleCn: string | null;
   updatedAt: string;
 }
 
@@ -54,6 +58,8 @@ CREATE TABLE IF NOT EXISTS library_items (
   subject_id INTEGER NOT NULL,
   collection_type TEXT NOT NULL,
   score INTEGER,
+  title TEXT,
+  title_cn TEXT,
   updated_at TEXT NOT NULL,
   PRIMARY KEY (user_id, subject_id)
 );
@@ -90,6 +96,15 @@ export class AppStore {
     }>;
     if (!tripColumns.some((column) => column.name === "source_template")) {
       this.db.exec("ALTER TABLE trips ADD COLUMN source_template TEXT");
+    }
+    const libraryColumns = this.db
+      .prepare("PRAGMA table_info(library_items)")
+      .all() as Array<{ name: string }>;
+    if (!libraryColumns.some((column) => column.name === "title")) {
+      this.db.exec("ALTER TABLE library_items ADD COLUMN title TEXT");
+    }
+    if (!libraryColumns.some((column) => column.name === "title_cn")) {
+      this.db.exec("ALTER TABLE library_items ADD COLUMN title_cn TEXT");
     }
   }
 
@@ -145,8 +160,8 @@ export class AppStore {
     try {
       this.db.prepare(`DELETE FROM library_items WHERE user_id = ?`).run(userId);
       const stmt = this.db.prepare(
-        `INSERT INTO library_items (user_id, subject_id, collection_type, score, updated_at)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO library_items (user_id, subject_id, collection_type, score, title, title_cn, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
       );
       for (const item of items) {
         stmt.run(
@@ -154,6 +169,8 @@ export class AppStore {
           item.subjectId,
           item.collectionType,
           item.score,
+          item.title,
+          item.titleCn,
           item.updatedAt,
         );
       }
@@ -167,7 +184,7 @@ export class AppStore {
   listLibrary(userId: string): LibraryItemRow[] {
     const rows = this.db
       .prepare(
-        `SELECT user_id, subject_id, collection_type, score, updated_at
+        `SELECT user_id, subject_id, collection_type, score, title, title_cn, updated_at
          FROM library_items WHERE user_id = ? ORDER BY updated_at DESC`,
       )
       .all(userId) as Array<Record<string, unknown>>;
@@ -176,6 +193,8 @@ export class AppStore {
       subjectId: Number(r.subject_id),
       collectionType: String(r.collection_type),
       score: r.score == null ? null : Number(r.score),
+      title: r.title == null || r.title === "" ? null : String(r.title),
+      titleCn: r.title_cn == null || r.title_cn === "" ? null : String(r.title_cn),
       updatedAt: String(r.updated_at),
     }));
   }

@@ -52,7 +52,14 @@ export default async function LibraryPage({
     return {
       ...item,
       mapped,
-      title: p ? localizedTitle(p, locale) : `#${item.subjectId}`,
+      title: localizedTitle(
+        {
+          subjectId: item.subjectId,
+          title: p?.title ?? item.title,
+          titleCn: p?.titleCn ?? item.titleCn,
+        },
+        locale,
+      ),
       city: localizeCity(p?.city ?? "—", locale),
       pointsLength: p?.pointsLength ?? 0,
       mapUrl: mapped ? anitabiMapUrl(item.subjectId) : null,

@@ -34,3 +34,33 @@ describe("AppStore trips", () => {
     store.close();
   });
 });
+
+describe("AppStore library", () => {
+  it("round-trips Bangumi titles on library items", () => {
+    const store = new AppStore(":memory:");
+    store.replaceLibrary("bgm:1", [
+      {
+        userId: "bgm:1",
+        subjectId: 311,
+        collectionType: "wish",
+        score: null,
+        title: "犬夜叉",
+        titleCn: "犬夜叉",
+        updatedAt: "2026-07-19T00:00:00.000Z",
+      },
+    ]);
+
+    expect(store.listLibrary("bgm:1")).toEqual([
+      {
+        userId: "bgm:1",
+        subjectId: 311,
+        collectionType: "wish",
+        score: null,
+        title: "犬夜叉",
+        titleCn: "犬夜叉",
+        updatedAt: "2026-07-19T00:00:00.000Z",
+      },
+    ]);
+    store.close();
+  });
+});

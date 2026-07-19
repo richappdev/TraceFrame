@@ -33,6 +33,8 @@ function libraryFromData(data: DocumentData): LibraryItemRow {
     subjectId: Number(data.subjectId),
     collectionType: String(data.collectionType),
     score: data.score == null ? null : Number(data.score),
+    title: data.title == null || data.title === "" ? null : String(data.title),
+    titleCn: data.titleCn == null || data.titleCn === "" ? null : String(data.titleCn),
     updatedAt: String(data.updatedAt),
   };
 }

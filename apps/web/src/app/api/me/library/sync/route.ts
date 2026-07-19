@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAccessToken, getSession } from "@/lib/auth";
-import { collectionTypeLabel, fetchUserCollections } from "@/lib/collections";
+import { collectionToLibraryItem, fetchUserCollections } from "@/lib/collections";
 import { openAppStore } from "@/lib/db";
 import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
 
@@ -25,13 +25,7 @@ async function syncLibrary() {
   const store = openAppStore();
   await store.replaceLibrary(
     session.user.id,
-    collections.map((c) => ({
-      userId: session.user.id,
-      subjectId: c.subject_id,
-      collectionType: collectionTypeLabel(c.type),
-      score: c.rate ?? null,
-      updatedAt: c.updated_at ?? now,
-    })),
+    collections.map((c) => collectionToLibraryItem(session.user.id, c, now)),
   );
   const count = (await store.listLibrary(session.user.id)).length;
   await store.close();

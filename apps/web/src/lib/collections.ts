@@ -2,6 +2,8 @@
  * Bangumi collection sync helpers (E1).
  * Collection types: 1 wish / 2 collect / 3 do / 4 on_hold / 5 dropped
  */
+import type { LibraryItemRow } from "./app-store";
+
 const API_BASE = "https://api.bgm.tv";
 
 const TYPE_MAP: Record<number, string> = {
@@ -18,6 +20,29 @@ export interface BangumiCollectionItem {
   type: number;
   rate?: number;
   updated_at?: string;
+}
+
+function cleanTitle(value: string | null | undefined): string | null {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+/** Map a Bangumi collection row into a persisted library item (including titles). */
+export function collectionToLibraryItem(
+  userId: string,
+  item: BangumiCollectionItem,
+  fallbackUpdatedAt: string,
+): LibraryItemRow {
+  return {
+    userId,
+    subjectId: item.subject_id,
+    collectionType: collectionTypeLabel(item.type),
+    score: item.rate ?? null,
+    title: cleanTitle(item.subject?.name),
+    titleCn: cleanTitle(item.subject?.name_cn),
+    updatedAt: item.updated_at ?? fallbackUpdatedAt,
+  };
 }
 
 export async function fetchUserCollections(

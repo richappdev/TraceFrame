@@ -1,5 +1,7 @@
 # Antiable Trip
 
+Online product name: **TraceFrame**.
+
 Bangumi library → Anitabi presence → city-day pilgrimage planner.
 
 Engineering plan: [Notion — Implementation plan](https://app.notion.com/p/Implementation-plan-Antiable-Trip-2026-07-15-39ea4181b62881689bd8c6d1cec238fe)

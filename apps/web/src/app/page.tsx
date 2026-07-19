@@ -21,11 +21,25 @@ export default async function HomePage({
     curatedTripSubjectIds(trip).reduce((sum, id) => sum + (presence.get(id)?.pointsLength ?? 0), 0),
   ]));
   presence.close();
-  const example = locale === "ja-JP"
-    ? [["新宿・四谷", "君の名は。 · 8か所"], ["須賀神社", "徒歩18分 · Anitabiマップ"], ["渋谷・三軒茶屋", "天気の子 · 12か所"]]
+  // Marketing route-board thumbs from Anitabi point screenshots (CC BY-NC-SA; demo only).
+  // 160209 = 你的名字; 269235 = 天气之子 (no 三轩茶屋 point — nearest Tokyo stand-in).
+  const exampleStops = locale === "ja-JP"
+    ? [
+      { title: "新宿・四谷", meta: "君の名は。 · 四ツ谷駅", image: "https://image.anitabi.cn/points/160209/3ik9kjlm.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+      { title: "須賀神社", meta: "徒歩18分 · 男坂", image: "https://image.anitabi.cn/points/160209/3ik9kj0a.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+      { title: "渋谷・代々木", meta: "天気の子 · 周辺スポット", image: "https://image.anitabi.cn/user/0/bangumi/269235/points/bm87q2n-1772299208216.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=269235" },
+    ]
     : locale === "zh-TW"
-      ? [["新宿 · 四谷", "你的名字。 · 8 個取景點"], ["須賀神社", "步行 18 分鐘 · Anitabi 地圖"], ["澀谷 · 三軒茶屋", "天氣之子 · 12 個取景點"]]
-      : [["新宿 · 四谷", "你的名字。 · 8 个取景点"], ["须贺神社", "步行 18 分钟 · Anitabi 地图"], ["涩谷 · 三轩茶屋", "天气之子 · 12 个取景点"]];
+      ? [
+        { title: "新宿 · 四谷", meta: "你的名字。 · 四谷站", image: "https://image.anitabi.cn/points/160209/3ik9kjlm.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+        { title: "須賀神社", meta: "步行 18 分鐘 · 男坂", image: "https://image.anitabi.cn/points/160209/3ik9kj0a.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+        { title: "澀谷 · 代代木", meta: "天氣之子 · 鄰近取景", image: "https://image.anitabi.cn/user/0/bangumi/269235/points/bm87q2n-1772299208216.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=269235" },
+      ]
+      : [
+        { title: "新宿 · 四谷", meta: "你的名字。 · 四谷站", image: "https://image.anitabi.cn/points/160209/3ik9kjlm.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+        { title: "须贺神社", meta: "步行 18 分钟 · 男坂", image: "https://image.anitabi.cn/points/160209/3ik9kj0a.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=160209" },
+        { title: "涩谷 · 代代木", meta: "天气之子 · 邻近取景", image: "https://image.anitabi.cn/user/0/bangumi/269235/points/bm87q2n-1772299208216.jpg?plan=h360", map: "https://anitabi.cn/map?bangumiId=269235" },
+      ];
   const authErrors: Record<string, string> = locale === "ja-JP" ? {
     exchange_failed: "Bangumiでログインを完了できませんでした。もう一度お試しください。", profile_failed: "Bangumiのアカウント情報を取得できませんでした。", storage_failed: "アカウント情報を保存できませんでした。", session_failed: "ログインセッションを作成できませんでした。", bad_state: "ログイン確認の有効期限が切れています。", missing_code: "Bangumiから認証コードが返されませんでした。", not_configured: "Bangumiログインが設定されていません。", error: "Bangumiログインがキャンセルされました。",
   } : locale === "zh-TW" ? {
@@ -45,6 +59,16 @@ export default async function HomePage({
       ) : null}
       <section className="home-hero">
         <div className="hero-wash" aria-hidden="true" />
+        <div className="viewfinder" aria-hidden="true">
+          <span className="vf-corner vf-tl" />
+          <span className="vf-corner vf-tr" />
+          <span className="vf-corner vf-bl" />
+          <span className="vf-corner vf-br" />
+          <span className="vf-meta vf-meta-tl">35mm</span>
+          <span className="vf-meta vf-meta-tr">24fps</span>
+          <span className="vf-meta vf-meta-bl">ISO 200</span>
+          <span className="vf-meta vf-meta-br">1/125</span>
+        </div>
         <div className="hero-copy">
           <p className="eyebrow"><span>{c.home.eyebrow}</span></p>
           <p className="hero-brand">TRACEFRAME</p>
@@ -67,35 +91,44 @@ export default async function HomePage({
 
         <div className="route-board" aria-label={c.home.example}>
           <div className="board-topline">
+            <span>DESTINATION · TOKYO</span>
             <span>ROUTE / 024</span>
-            <span>35.6762° N</span>
           </div>
           <div className="board-heading">
             <div>
-              <span className="board-kicker">TOKYO · 2 DAYS</span>
+              <span className="board-kicker">ITINERARY · 2 DAYS</span>
               <h2>{c.home.exampleTitle}</h2>
             </div>
             <span className="board-stamp">DRAFT</span>
           </div>
           <ol className="route-list">
-            <li>
-              <span className="route-time">DAY 1</span>
-              <span className="route-dot" />
-              <div><strong>{example[0]![0]}</strong><small>{example[0]![1]}</small></div>
-            </li>
-            <li>
-              <span className="route-time">DAY 1</span>
-              <span className="route-dot" />
-              <div><strong>{example[1]![0]}</strong><small>{example[1]![1]}</small></div>
-            </li>
-            <li>
-              <span className="route-time">DAY 2</span>
-              <span className="route-dot" />
-              <div><strong>{example[2]![0]}</strong><small>{example[2]![1]}</small></div>
-            </li>
+            {exampleStops.map((stop, index) => (
+              <li key={stop.image}>
+                <span className="route-time">{index < 2 ? "DAY 1" : "DAY 2"}</span>
+                <span className="route-dot" />
+                <div className="route-stop">
+                  <a className="route-thumb-link" href={stop.map} rel="noopener noreferrer" target="_blank">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="route-thumb" src={stop.image} alt={stop.title} width={104} height={104} loading="lazy" decoding="async" />
+                  </a>
+                  <div>
+                    <strong>{stop.title}</strong>
+                    <small>{stop.meta}</small>
+                  </div>
+                </div>
+              </li>
+            ))}
           </ol>
+          <p className="board-credit">
+            {locale === "ja-JP"
+              ? "写真：Anitabi 貢献者（CC BY-NC-SA）"
+              : locale === "zh-TW"
+                ? "照片：Anitabi 貢獻者（CC BY-NC-SA）"
+                : "照片：Anitabi 贡献者（CC BY-NC-SA）"}
+          </p>
           <div className="board-footer">
-            <span>2 {c.common.works}</span><span>20 {c.common.points}</span><span>{c.shared.readonly}</span>
+            <span>COLLECT MOMENTS</span>
+            <span>2 {c.common.works} · 20 {c.common.points}</span>
           </div>
         </div>
       </section>

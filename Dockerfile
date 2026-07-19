@@ -15,17 +15,13 @@ COPY apps/web apps/web
 COPY packages packages
 COPY valid-ids.csv ./valid-ids.csv
 
-# Public Firebase web config (baked into the Next.js client bundle at build time).
-ARG NEXT_PUBLIC_FIREBASE_API_KEY=""
-ARG NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="antiable-anipin.firebaseapp.com"
-ARG NEXT_PUBLIC_FIREBASE_PROJECT_ID="antiable-anipin"
-ARG NEXT_PUBLIC_FIREBASE_APP_ID=""
-ARG NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=""
-ENV NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY \
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN \
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID=$NEXT_PUBLIC_FIREBASE_PROJECT_ID \
-    NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID \
-    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+# Public Firebase web config — must be present at `next build` (client-inlined).
+# Cloud Run `--set-build-env-vars` does not reliably map to Docker ARG for --source builds.
+ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCJ9hJbciDjqxqSR7EMnnqnYpfiahyHNO4" \
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="antiable-anipin.firebaseapp.com" \
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="antiable-anipin" \
+    NEXT_PUBLIC_FIREBASE_APP_ID="1:852169798731:web:eb95735b011d77ce36c9ce" \
+    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="G-PMSD55TH5V"
 
 RUN npm run build
 

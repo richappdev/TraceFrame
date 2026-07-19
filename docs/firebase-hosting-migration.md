@@ -90,8 +90,8 @@ pwsh scripts/deploy-firebase-hosting.ps1
 `firebase.json` uses `pinTag: true`, so a Hosting release is tied to the selected Cloud
 Run revision and Hosting rollbacks can restore the corresponding revision.
 
-Public Firebase Analytics identifiers are passed as Cloud Run build env vars so
-`NEXT_PUBLIC_FIREBASE_*` are baked into the Next.js client bundle.
+Public Firebase Analytics identifiers are set as `ENV` in the Dockerfile so
+`NEXT_PUBLIC_FIREBASE_*` are baked into the Next.js client bundle at image build.
 
 ## Release verification
 

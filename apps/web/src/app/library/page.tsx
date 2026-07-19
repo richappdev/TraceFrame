@@ -1,4 +1,5 @@
 import { anitabiMapUrl } from "@antiable/anitabi";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
@@ -29,9 +30,9 @@ export default async function LibraryPage({
           ) : (
             <span className="btn">OAuth 未配置（见 apps/web/.env.example）</span>
           )}
-          <a className="btn" href="/presence">
+          <Link className="btn" href="/presence">
             先浏览公开 Presence 索引
-          </a>
+          </Link>
         </div>
       </section>
     );
@@ -72,15 +73,15 @@ export default async function LibraryPage({
               同步收藏
             </button>
           </form>
-          <a className="btn" href={mappedOnly ? "/library" : "/library?mapped=1"}>
+          <Link className="btn" href={mappedOnly ? "/library" : "/library?mapped=1"}>
             {mappedOnly ? "显示全部" : "仅看已映射"}
-          </a>
-          <a className="btn btn-primary" href="/trips/new">
+          </Link>
+          <Link className="btn btn-primary" href="/trips/new">
             规划行程
-          </a>
-          <a className="btn" href="/trips">
+          </Link>
+          <Link className="btn" href="/trips">
             我的行程
-          </a>
+          </Link>
           <a className="btn" href="/api/auth/logout">
             退出
           </a>

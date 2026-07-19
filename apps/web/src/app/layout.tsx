@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <a href="/presence">发现</a>
                 <a href="/library">收藏</a>
                 <a href="/trips">行程</a>
+                <a href="/data-policy">数据政策</a>
               </nav>
               <a className="nav-cta" href="/trips/new">规划路线 <span aria-hidden="true">↗</span></a>
             </div>
@@ -39,6 +40,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <p className="data-credit">
                 地图数据来自 <a href="https://anitabi.cn" rel="noopener noreferrer" target="_blank">Anitabi</a> 贡献者，
                 CC BY-NC-SA · 条目数据来自 <a href="https://bgm.tv" rel="noopener noreferrer" target="_blank">Bangumi</a>
+              </p>
+              <p className="data-credit">
+                <a href="/privacy">隐私与数据删除</a> · <a href="/data-policy">数据与许可政策</a>
               </p>
               <p className="footer-code">TF / 2026</p>
             </div>

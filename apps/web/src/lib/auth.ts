@@ -14,6 +14,11 @@ export async function getSession(): Promise<SessionData | null> {
 export async function getAccessToken(): Promise<string | null> {
   const session = await getSession();
   if (!session?.accessTokenEnc) return null;
+  if (session.tokenExpiresAt != null && session.tokenExpiresAt <= Date.now() + 30_000) {
+    // Bangumi's official API reference does not document a refresh-token grant.
+    // Fail closed and require a new OAuth login instead of guessing a token flow.
+    return null;
+  }
   try {
     return decryptToken(session.accessTokenEnc);
   } catch {

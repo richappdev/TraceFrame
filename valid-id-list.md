@@ -4,6 +4,8 @@ Living register of Bangumi subject IDs that returned **HTTP 200** from Anitabiâ€
 
 Machine-readable source of truth: [`valid-ids.csv`](./valid-ids.csv)
 
+> Current canonical inventory: **14 reconciled IDs**, verified 2026-07-18. The long table below is retained as a historical 2026-07-15 snapshot and must not be used as the current seed.
+
 ## Validity rule
 
 | Response | Meaning |
@@ -22,9 +24,9 @@ Machine-readable source of truth: [`valid-ids.csv`](./valid-ids.csv)
 | 2 | Regression / collect window as requested (e.g. 3 min or 10 min) |
 | 3 | Use smarter IDs (Bangumi ranked + seeds + neighborhood), not pure random |
 | 4 | Log security signals (`403`/`429`, Cloudflare HTML, latency, `CF-RAY`) |
-| 5 | **Change egress IP at least every 3 minutes** (new proxy exit, VPN hop, or fresh cloud runner). Do not keep hammering one blocked IP. |
-| 6 | On Cloudflare challenge / sustained `403`, **stop that egress**, rotate IP, then continue |
-| 7 | Save each run under `probe-testing/<yyyyMMdd-HHmmss>/` and merge valids into `valid-ids.csv` |
+| 5 | On the first Cloudflare challenge or sustained `403`, **stop the entire run** and cool down. Do not rotate egress to continue enumeration. |
+| 6 | Resume only with a bounded curated set or an approved partner/bulk-data mechanism. |
+| 7 | Save each approved run under `probe-testing/<yyyyMMdd-HHmmss>/` and merge valids into `valid-ids.csv`. |
 
 ## After every probe run
 
@@ -70,7 +72,7 @@ $byId.Values | Sort-Object { [int]$_.id } | Export-Csv .\valid-ids.csv -NoTypeIn
 
 ## Current inventory
 
-See [`valid-ids.csv`](./valid-ids.csv). Snapshot (**15** IDs, updated 2026-07-15):
+Historical snapshot (**15** pre-reconciliation rows, captured 2026-07-15; superseded by `valid-ids.csv`):
 
 | id | cn | title | city | points | images | node |
 |---|---|---|---|---|---|---|

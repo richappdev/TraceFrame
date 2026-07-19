@@ -12,9 +12,35 @@ import type { HydratedTrip } from "@/lib/trips";
 export function TripEditor({ trip }: { trip: HydratedTrip }) {
   const [title, setTitle] = useState(trip.title);
   const [days, setDays] = useState<EditableDay[]>(trip.days);
+  const [shareToken, setShareToken] = useState(trip.shareToken);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const sharePath = trip.shareToken ? `/t/${trip.shareToken}` : null;
+  const sharePath = shareToken ? `/t/${shareToken}` : null;
+
+  function updateShare(shareAction: "rotate" | "revoke") {
+    startTransition(async () => {
+      setStatus(null);
+      try {
+        const res = await fetch(`/api/trips/${trip.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ shareAction }),
+        });
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          trip?: HydratedTrip;
+        };
+        if (!res.ok || !body.trip) {
+          setStatus(body.error ?? `分享设置失败 (${res.status})`);
+          return;
+        }
+        setShareToken(body.trip.shareToken);
+        setStatus(shareAction === "revoke" ? "旧分享链接已撤销" : "已生成新的分享链接");
+      } catch {
+        setStatus("网络错误，请重试");
+      }
+    });
+  }
 
   function save(nextTitle: string, nextDays: EditableDay[]) {
     startTransition(async () => {
@@ -73,8 +99,39 @@ export function TripEditor({ trip }: { trip: HydratedTrip }) {
       {sharePath ? (
         <div className="share-box">
           只读分享： <Link href={sharePath}>{sharePath}</Link>
+          <div className="cta-row" style={{ marginTop: "0.75rem" }}>
+            <button
+              className="btn btn-tiny"
+              type="button"
+              disabled={pending}
+              onClick={() => updateShare("rotate")}
+            >
+              更换链接
+            </button>
+            <button
+              className="btn btn-tiny"
+              type="button"
+              disabled={pending}
+              onClick={() => updateShare("revoke")}
+            >
+              撤销分享
+            </button>
+          </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="share-box">
+          当前未公开分享。
+          <button
+            className="btn btn-tiny"
+            style={{ marginLeft: "0.75rem" }}
+            type="button"
+            disabled={pending}
+            onClick={() => updateShare("rotate")}
+          >
+            生成分享链接
+          </button>
+        </div>
+      )}
 
       <div className="trip-form" style={{ marginBottom: "1.5rem" }}>
         <label className="field">

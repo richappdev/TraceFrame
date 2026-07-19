@@ -6,9 +6,9 @@ const baseDirectory = path.dirname(fileURLToPath(import.meta.url));
 const compat = new FlatCompat({ baseDirectory });
 
 const config = [
+  { ignores: [".next/**", "vendor/**", "next-env.d.ts"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "vendor/**", "next-env.d.ts"],
     rules: {
       "@next/next/no-html-link-for-pages": "off",
     },

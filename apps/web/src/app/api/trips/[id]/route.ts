@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import type { TripDay } from "@/lib/planner";
 import { hydrateTrip } from "@/lib/trips";
+import { isTrustedMutationOrigin } from "@/lib/request-origin";
+import {
+  TripInputError,
+  assertReasonableRequestSize,
+  normalizeTripDays,
+  normalizeTripTitle,
+} from "@/lib/trip-validation";
 
 export const runtime = "nodejs";
 
@@ -41,6 +49,9 @@ export async function GET(request: Request, ctx: Ctx) {
 }
 
 export async function PATCH(request: Request, ctx: Ctx) {
+  if (!isTrustedMutationOrigin(request)) {
+    return NextResponse.json({ error: "invalid_origin" }, { status: 403 });
+  }
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -60,28 +71,30 @@ export async function PATCH(request: Request, ctx: Ctx) {
     const body = (await request.json()) as {
       title?: string;
       days?: TripDay[];
+      shareAction?: "rotate" | "revoke";
     };
 
     let daysJson: string | undefined;
     let subjectIdsJson: string | undefined;
     if (Array.isArray(body.days)) {
-      const days = body.days
-        .map((d, i) => ({
-          day: Number(d.day) || i + 1,
-          city: String(d.city ?? ""),
-          subjectIds: Array.isArray(d.subjectIds)
-            ? d.subjectIds.map(Number).filter((n) => Number.isFinite(n))
-            : [],
-        }))
-        .filter((d) => d.subjectIds.length > 0);
+      const days = normalizeTripDays(body.days);
       daysJson = JSON.stringify(days);
       subjectIdsJson = JSON.stringify([...new Set(days.flatMap((d) => d.subjectIds))]);
     }
 
+    assertReasonableRequestSize(request);
+    const shareToken =
+      body.shareAction === "rotate"
+        ? randomBytes(24).toString("base64url")
+        : body.shareAction === "revoke"
+          ? null
+          : undefined;
+
     await store.updateTrip(id, {
-      title: body.title?.trim() || undefined,
+      title: body.title === undefined ? undefined : normalizeTripTitle(body.title),
       daysJson,
       subjectIdsJson,
+      shareToken,
       updatedAt: new Date().toISOString(),
     });
 
@@ -91,7 +104,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     console.error(err);
     return NextResponse.json(
       { error: "update_failed", message: err instanceof Error ? err.message : String(err) },
-      { status: 500 },
+      { status: err instanceof TripInputError ? err.status : 500 },
     );
   } finally {
     await store.close();

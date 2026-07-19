@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { getAccessToken, getSession } from "@/lib/auth";
 import { collectionTypeLabel, fetchUserCollections } from "@/lib/collections";
 import { openAppStore } from "@/lib/db";
-import { absoluteUrl } from "@/lib/request-origin";
+import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
 
 export const runtime = "nodejs";
 
 async function syncLibrary() {
   const session = await getSession();
   const token = await getAccessToken();
-  if (!session?.user || !token) {
+  if (!session?.user) {
     return { ok: false as const, status: 401, error: "unauthorized" };
+  }
+  if (!token) {
+    return { ok: false as const, status: 401, error: "reauth_required" };
   }
   const username = session.user.username;
   if (!username) {
@@ -36,6 +39,9 @@ async function syncLibrary() {
 }
 
 export async function POST(request: Request) {
+  if (!isTrustedMutationOrigin(request)) {
+    return NextResponse.json({ error: "invalid_origin" }, { status: 403 });
+  }
   const contentType = request.headers.get("content-type") ?? "";
   const wantsHtml =
     contentType.includes("application/x-www-form-urlencoded") ||

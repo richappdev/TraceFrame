@@ -1,47 +1,75 @@
-# M2 acceptance checklist — Shareable trip
+# M2 release gate — shareable trip
 
-MVP ship gate from the [Implementation plan](https://app.notion.com/p/39ea4181b62881689bd8c6d1cec238fe).
+M2 is complete only when every required item is checked on a Firebase App Hosting preview. “Implemented” is not “released.” Record the preview URL, tester, date, and evidence links at the bottom.
 
-## Prerequisites
+## 1. Configuration and durable storage
 
-- [ ] `apps/web/.env.local` has `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, `SESSION_SECRET`
-- [ ] Bangumi app **回调地址** matches `BANGUMI_REDIRECT_URI` exactly
-- [ ] `npm run presence:import` (or auto-seed) yields ≥1 mapped titles
-- [ ] `npm run dev` → `GET /api/health` returns `phase: "E3"` (or later)
+- [ ] `BANGUMI_CLIENT_ID`, `BANGUMI_CLIENT_SECRET`, `BANGUMI_REDIRECT_URI`, and a 32+ character `SESSION_SECRET` are configured as App Hosting secrets.
+- [ ] Hosted runtime reports `APP_STORE=firestore`; production startup refuses local SQLite.
+- [ ] Firestore exists in the deployment project and the App Hosting service account can read/write it.
+- [ ] A saved trip and public share link still work after a redeploy or instance restart.
+- [ ] Firestore export/restore ownership and schedule are recorded in `docs/firestore-operations.md`.
 
-## M1 — Library ↔ map
+## 2. OAuth and session security
 
-- [ ] `/library` shows Bangumi login (not “OAuth 未配置”)
-- [ ] Login redirects back to `/library` with session cookie
-- [ ] **同步收藏** loads wish/doing/done items
-- [ ] Mapped titles show **已映射** badge + city + Anitabi deep link
-- [ ] Unmapped titles show **未映射**; `?mapped=1` filters correctly
+- [ ] Bangumi callback exactly matches the hosted `/api/auth/callback` URL.
+- [ ] OAuth rejects missing, modified, expired, and replayed `state` values.
+- [ ] Session cookie is `httpOnly`, `Secure` in production, `SameSite=Lax`, signed with HMAC, and expires after 30 days.
+- [ ] Missing or weak production `SESSION_SECRET` prevents startup.
+- [ ] Logout clears the session; expired Bangumi tokens produce a re-login path rather than exposing credentials.
+- [ ] Cross-site POST/PATCH/DELETE requests are rejected.
 
-## E2 — City browse
+## 3. M1 library and Presence
 
-- [ ] `/presence` city chips link with `?city=`
-- [ ] Filtering updates the title list; “全部” clears filter
-- [ ] Each title links to `anitabi.cn/map?bangumiId=`
-- [ ] Footer shows Anitabi BY-NC-SA + Bangumi credit
+- [ ] Login returns to Library and collection sync covers wish/doing/done.
+- [ ] Mapped and unmapped states, filters, empty states, and upstream errors are understandable.
+- [ ] Presence uses the reconciled `valid-ids.csv` inventory and shows its verification date.
+- [ ] Every mapped title links to `anitabi.cn/map?bangumiId=` and displays attribution.
+- [ ] No automated job rotates egress or continues enumeration after Cloudflare 403/challenge.
 
-## M2 — Shareable trip
+## 4. Trip integrity and authorization
 
-- [ ] `/trips/new` lists mapped library titles (or Presence fallback)
-- [ ] Creating a trip with selected titles redirects to `/trips/:id`
-- [ ] Owner can rename trip, reorder days/titles, and **保存修改**
-- [ ] `/trips` lists saved trips with edit + share links
-- [ ] `/t/:token` opens read-only share view (incognito / logged-out)
-- [ ] Share view deep-links Anitabi maps; no POI screenshot payloads
+- [ ] Create accepts 1–3 days, no more than 50 unique valid subject IDs, and an 80-character title.
+- [ ] Empty, duplicate, malformed, oversized (>64 KiB), and unmapped inputs return safe 4xx errors.
+- [ ] Owner can list, rename, reorder, and read their trips.
+- [ ] A different logged-in user cannot read or PATCH an owner trip.
+- [ ] Anonymous access to `/api/trips/:id` is forbidden without the correct share token.
+- [ ] Public `/t/:token` is read-only and works in a clean logged-out browser.
 
-## Preview deploy (week-8 exit)
+## 5. Share-token lifecycle
 
-- [ ] App Hosting secrets pushed (`scripts/set-apphosting-secrets.ps1`)
-- [ ] Deploy succeeds; `/api/health` OK on hosted URL
-- [ ] Hosted `BANGUMI_REDIRECT_URI` + Bangumi callback updated
-- [ ] Full M1→M2 path works on hosted URL
+- [ ] New tokens use 192 bits of randomness.
+- [ ] Rotating a token immediately invalidates the old URL.
+- [ ] Revoking sharing immediately invalidates the public URL.
+- [ ] Regenerating sharing after revocation creates a different URL.
+- [ ] Share view contains only trip metadata and Anitabi deep links—no POI screenshot payload.
 
-## Out of scope for M2 (E4+)
+## 6. Privacy, licensing, and deletion
 
-- Anitabi `/points/detail` galleries
-- Walk/transit POI order, GPX / Google Maps export
-- PWA / i18n / affiliates
+- [ ] `/privacy` explains stored data and successfully deletes the user, library, and owned trips.
+- [ ] Deletion clears the session and makes old share links unavailable.
+- [ ] `/data-policy` is linked globally and matches `docs/data-rights-matrix.md`.
+- [ ] No paid planning, affiliate links, commercial export, POI detail, screenshots, or offline packs are enabled before the rights gate is approved.
+- [ ] Attribution is visible wherever Anitabi-derived metadata appears.
+
+## 7. Quality and operations
+
+- [ ] `npm run test`, `npm run typecheck`, and `npm run build` pass.
+- [ ] Mobile widths, keyboard navigation, focus visibility, and labels are manually checked.
+- [ ] `/api/health` succeeds and identifies the release as `implemented-awaiting-acceptance` until this checklist passes.
+- [ ] Error logs do not contain OAuth tokens, session cookies, or personal collection payloads.
+- [ ] Rollback procedure and Firestore recovery procedure have been dry-run or reviewed.
+
+## Evidence
+
+| Field | Value |
+|---|---|
+| Preview URL | Pending |
+| Commit | Pending |
+| Tester / date | Pending |
+| Persistence evidence | Pending |
+| Logged-out share URL | Pending |
+| Deletion evidence | Pending |
+| Result | **OPEN** |
+
+E4 remains blocked until Result is changed to **PASS**.

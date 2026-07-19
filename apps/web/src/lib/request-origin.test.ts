@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { absoluteUrl, getRequestOrigin } from "./request-origin";
+import { absoluteUrl, getRequestOrigin, isTrustedMutationOrigin } from "./request-origin";
 
 const PREV_REDIRECT = process.env.BANGUMI_REDIRECT_URI;
 
@@ -68,5 +68,18 @@ describe("absoluteUrl", () => {
       "/?auth=bad_state",
     );
     expect(url.toString()).toBe("https://app.example.com/?auth=bad_state");
+  });
+});
+
+describe("isTrustedMutationOrigin", () => {
+  it("accepts same-origin and rejects cross-origin requests", () => {
+    expect(isTrustedMutationOrigin(req("https://traceframe.example/api", {
+      host: "traceframe.example",
+      origin: "https://traceframe.example",
+    }))).toBe(true);
+    expect(isTrustedMutationOrigin(req("https://traceframe.example/api", {
+      host: "traceframe.example",
+      origin: "https://evil.example",
+    }))).toBe(false);
   });
 });

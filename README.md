@@ -42,24 +42,27 @@ Copy `apps/web/.env.example` → `apps/web/.env.local` and fill Bangumi OAuth cr
 | `/api/health` | Deploy smoke |
 | `/api/presence` | Paginated presence JSON |
 | `/api/trips` | Create / list trips |
+| `/privacy` | Stored-data explanation and account deletion |
+| `/data-policy` | License and commercial-use guardrails |
 
 Reports: `reports/coverage-YYYY-MM-DD.{json,md}` · DB: `data/presence.sqlite`
 
-Set `SKIP_NETWORK=1` on smoke/coverage for offline CI. If Anitabi returns Cloudflare 403, smoke falls back to the presence seed.
+Set `SKIP_NETWORK=1` on smoke/coverage for offline CI. If Anitabi returns Cloudflare 403 or a challenge, stop the refresh; smoke may fall back to the curated presence seed. Do not rotate egress to continue enumeration.
 
 ## License / data policy (MVP)
 
-Persist presence **metadata** only. Do not redistribute Anitabi detail POI/screenshot payloads commercially. Deep-link `anitabi.cn/map?bangumiId=` and credit Anitabi (BY-NC-SA) + Bangumi.
+Persist presence **metadata** only. Do not redistribute Anitabi detail POI/screenshot payloads. Deep-link `anitabi.cn/map?bangumiId=` and credit Anitabi (BY-NC-SA) + Bangumi. Paid planning, affiliate links, and commercial exports remain disabled until the rights gate in [`docs/data-rights-matrix.md`](docs/data-rights-matrix.md) is approved.
 
 ## Phase status
 
-- **E0 Foundations** — done (scaffold, clients, presence import, M0 coverage report)
-- **E1 Auth & library** — done in code (OAuth + library sync/join); set Bangumi credentials in `.env.local`
-- **E2 Discovery UX** — city chips filter `/presence`, attribution footer, unmapped FAQ
-- **E3 Day planner MVP** — trip CRUD, owner list, reorder editor, share token (`/t/:token`)
-- **M2 gate** — see `docs/m2-acceptance.md` (manual + preview deploy)
+- **E0–E3 implementation** — code complete; this is not a release claim.
+- **Presence inventory** — 14 reconciled IDs as of 2026-07-18; the older 15-ID coverage report is superseded.
+- **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md).
 - **Firebase** — project `antiable-traceframe` (display: Traceframe); App Hosting config ready
-- E4+ — POI detail / export (see Notion)
+- **Production data** — Firestore required; local SQLite is development-only.
+- **E4+** — blocked until M2 passes and rights/data gates are approved.
+
+Planning records: [`docs/product-validation.md`](docs/product-validation.md) · [`docs/firestore-operations.md`](docs/firestore-operations.md) · [`docs/data-rights-matrix.md`](docs/data-rights-matrix.md)
 
 ## Deploy (Firebase App Hosting)
 

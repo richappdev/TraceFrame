@@ -6,7 +6,9 @@ export function GET() {
   return NextResponse.json({
     ok: true,
     service: "traceframe",
-    phase: "E3",
+    phase: "M2",
+    releaseStatus: "implemented-awaiting-acceptance",
+    appStore: process.env.APP_STORE === "firestore" ? "firestore" : "sqlite-development",
     time: new Date().toISOString(),
   });
 }

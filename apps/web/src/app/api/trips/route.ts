@@ -4,16 +4,21 @@ import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
 import { buildTripDays, clampDayCount } from "@/lib/planner";
 import { openPresenceStore } from "@/lib/presence";
-import { absoluteUrl } from "@/lib/request-origin";
+import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
 import { hydrateTrip } from "@/lib/trips";
+import {
+  TripInputError,
+  assertReasonableRequestSize,
+  normalizeSubjectIds,
+  normalizeTripTitle,
+} from "@/lib/trip-validation";
 
 export const runtime = "nodejs";
 
 function parseSubjectIdsFromBody(body: unknown): number[] {
   if (!body || typeof body !== "object") return [];
   const raw = (body as { subjectIds?: unknown }).subjectIds;
-  if (!Array.isArray(raw)) return [];
-  return [...new Set(raw.map(Number).filter((n) => Number.isFinite(n) && n > 0))];
+  return normalizeSubjectIds(raw);
 }
 
 async function parseCreateInput(request: Request): Promise<{
@@ -29,20 +34,17 @@ async function parseCreateInput(request: Request): Promise<{
       dayCount?: unknown;
     };
     return {
-      title: String(body.title ?? "").trim() || "我的巡礼行程",
+      title: normalizeTripTitle(body.title),
       subjectIds: parseSubjectIdsFromBody(body),
       dayCount: clampDayCount(body.dayCount),
     };
   }
 
   const form = await request.formData();
-  const ids = form
-    .getAll("subjectId")
-    .map((v) => Number(v))
-    .filter((n) => Number.isFinite(n) && n > 0);
+  const ids = normalizeSubjectIds(form.getAll("subjectId"));
   return {
-    title: String(form.get("title") ?? "").trim() || "我的巡礼行程",
-    subjectIds: [...new Set(ids)],
+    title: normalizeTripTitle(form.get("title")),
+    subjectIds: ids,
     dayCount: clampDayCount(form.get("dayCount")),
   };
 }
@@ -69,6 +71,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!isTrustedMutationOrigin(request)) {
+    return NextResponse.json({ error: "invalid_origin" }, { status: 403 });
+  }
   const session = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -81,6 +86,7 @@ export async function POST(request: Request) {
     (request.headers.get("accept") ?? "").includes("text/html");
 
   try {
+    assertReasonableRequestSize(request);
     const input = await parseCreateInput(request);
     if (input.subjectIds.length === 0) {
       if (wantsHtml) {
@@ -105,7 +111,7 @@ export async function POST(request: Request) {
     const days = buildTripDays(records, input.dayCount);
     const now = new Date().toISOString();
     const tripId = randomUUID();
-    const shareToken = randomBytes(12).toString("base64url");
+    const shareToken = randomBytes(24).toString("base64url");
     const subjectIds = records.map((r) => r.subjectId);
 
     const store = openAppStore();
@@ -133,7 +139,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json(
       { error: "create_failed", message: err instanceof Error ? err.message : String(err) },
-      { status: 500 },
+      { status: err instanceof TripInputError ? err.status : 500 },
     );
   }
 }

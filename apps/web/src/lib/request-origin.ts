@@ -52,3 +52,18 @@ export function getRequestOrigin(request: Request): string {
 export function absoluteUrl(request: Request, path: string): URL {
   return new URL(path, `${getRequestOrigin(request)}/`);
 }
+
+/** Reject cross-site browser requests before they can use the session cookie. */
+export function isTrustedMutationOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (origin) {
+    try {
+      return new URL(origin).origin === getRequestOrigin(request);
+    } catch {
+      return false;
+    }
+  }
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite) return fetchSite === "same-origin" || fetchSite === "same-site";
+  return process.env.NODE_ENV !== "production";
+}

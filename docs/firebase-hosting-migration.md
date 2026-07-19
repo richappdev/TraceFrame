@@ -32,7 +32,7 @@ npx -y firebase-tools@latest hosting:sites:create antiable-traceframe --project 
 Create a dedicated Cloud Run runtime identity and grant only the required runtime roles:
 
 ```powershell
-gcloud iam service-accounts create traceframe-web --project antiable-traceframe --display-name "Traceframe web runtime"
+gcloud iam service-accounts create traceframe-web --project antiable-traceframe --display-name "AniPins web runtime"
 gcloud projects add-iam-policy-binding antiable-traceframe --member "serviceAccount:traceframe-web@antiable-traceframe.iam.gserviceaccount.com" --role "roles/datastore.user"
 
 $secrets = @("BANGUMI_CLIENT_ID", "BANGUMI_CLIENT_SECRET", "BANGUMI_REDIRECT_URI", "SESSION_SECRET")

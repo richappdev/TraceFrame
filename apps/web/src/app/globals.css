@@ -58,9 +58,28 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .topbar-inner { max-width: 1240px; margin: 0 auto; height: 76px; padding: 0 28px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 32px; }
 .brand { display: inline-flex; align-items: center; gap: 11px; width: fit-content; font: 800 .9rem/1 var(--font-display); letter-spacing: .12em; }
 .brand small { display: block; margin-top: 5px; color: var(--ink-soft); font-size: .59rem; font-weight: 600; letter-spacing: .17em; }
-.brand-mark { position: relative; display: block; width: 31px; height: 31px; border: 2px solid var(--ink); border-radius: 50%; }
-.brand-mark::before { content: ""; position: absolute; width: 9px; height: 9px; left: 9px; top: 7px; border: 2px solid var(--cyan); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
-.brand-mark i { position: absolute; width: 6px; height: 6px; right: -4px; bottom: 2px; background: var(--amber); border-radius: 50%; }
+.brand-mark { position: relative; display: block; width: 28px; height: 34px; }
+.brand-mark::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ink);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: color-mix(in srgb, var(--cyan) 18%, transparent);
+}
+.brand-mark i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  left: 10.5px;
+  top: 6.5px;
+  background: var(--amber);
+  border-radius: 50%;
+}
 .nav { display: flex; gap: 6px; align-items: center; }
 .nav a { padding: 9px 14px; border-radius: 7px; color: var(--ink-soft); font-size: .95rem; font-weight: 650; }
 .nav a:hover { color: var(--ink); background: rgba(247, 249, 252, 0.8); }
@@ -94,33 +113,33 @@ main { width: 100%; max-width: 1120px; margin: 0 auto; padding: 64px 32px 96px; 
   filter: blur(2px);
   animation: wash-drift 18s ease-in-out infinite alternate;
 }
-.viewfinder {
+.pin-frame {
   position: absolute;
   inset: 8px 0 24px;
   pointer-events: none;
   z-index: 0;
 }
-.vf-corner {
+.pf-corner {
   position: absolute;
   width: 28px;
   height: 28px;
   border: 2px solid rgba(15, 27, 45, 0.28);
 }
-.vf-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
-.vf-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
-.vf-bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
-.vf-br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
-.vf-meta {
+.pf-tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.pf-tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.pf-bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.pf-br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.pf-meta {
   position: absolute;
   color: rgba(15, 27, 45, 0.38);
   font: 650 .62rem/1 var(--font-mono);
   letter-spacing: .12em;
   text-transform: uppercase;
 }
-.vf-meta-tl { top: 10px; left: 36px; }
-.vf-meta-tr { top: 10px; right: 36px; }
-.vf-meta-bl { bottom: 10px; left: 36px; }
-.vf-meta-br { bottom: 10px; right: 36px; }
+.pf-meta-tl { top: 10px; left: 36px; }
+.pf-meta-tr { top: 10px; right: 36px; }
+.pf-meta-bl { bottom: 10px; left: 36px; }
+.pf-meta-br { bottom: 10px; right: 36px; }
 .hero-copy, .route-board { position: relative; z-index: 1; min-width: 0; }
 .eyebrow { margin: 0 0 22px; color: var(--cyan-dark); font: 750 .7rem/1.4 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
 .hero-brand {
@@ -673,7 +692,7 @@ button:disabled { opacity: .42; cursor: not-allowed; transform: none !important;
   main { padding: 40px 20px 88px; }
   .auth-error { align-items: flex-start; flex-direction: column; gap: 10px; }
   .home-hero { grid-template-columns: 1fr; min-height: 0; padding-top: 20px; }
-  .viewfinder { display: none; }
+  .pin-frame { display: none; }
   .route-board { max-width: 540px; width: 100%; justify-self: center; transform: rotate(.5deg); }
   .section-heading-row { grid-template-columns: 1fr; gap: 20px; }
   .section-heading-row > p { max-width: 580px; }

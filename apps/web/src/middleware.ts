@@ -38,7 +38,7 @@ export function middleware(request: NextRequest) {
     if (!isPagePath(publicPath)) return NextResponse.next();
     url.pathname = publicPath;
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-traceframe-locale", routeLocale);
+    requestHeaders.set("x-anipins-locale", routeLocale);
     const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     // Only write locale preference when `__session` is empty or already a locale
     // preference — never clobber auth or OAuth CSRF payloads.

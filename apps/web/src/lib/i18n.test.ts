@@ -32,6 +32,7 @@ describe("i18n helpers", () => {
     expect(localeFromSessionCookie("locale:zh-TW")).toBe("zh-TW");
     expect(localeFromSessionCookie("eyJ1c2VyIjox.sig")).toBeNull();
     expect(localeFromCookieHeader("a=1; __session=locale:zh-TW")).toBe("zh-TW");
+    expect(localeFromCookieHeader("a=1; anipins_locale=zh-TW")).toBe("zh-TW");
     expect(localeFromCookieHeader("a=1; traceframe_locale=zh-TW")).toBe("zh-TW");
     expect(localeFromPathname("/ja-JP/trips/new")).toBe("ja-JP");
   });

@@ -2,7 +2,9 @@ export const locales = ["zh-CN", "zh-TW", "ja-JP"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "zh-CN";
 /** @deprecated Firebase Hosting strips this cookie; locale preference uses `__session`. */
-export const LOCALE_COOKIE = "traceframe_locale";
+export const LOCALE_COOKIE = "anipins_locale";
+/** @deprecated Prefer LOCALE_COOKIE; still read for old browsers. */
+export const LEGACY_LOCALE_COOKIE = "traceframe_locale";
 /**
  * Firebase Hosting only forwards `__session` to Cloud Run. Anonymous locale
  * preference is stored as `locale:<Locale>` in that cookie when no auth/OAuth
@@ -96,9 +98,9 @@ export function localizedTitle(
 export const copy = {
   "zh-CN": {
     site: {
-      title: "Traceframe — 动画巡礼行程规划",
+      title: "AniPins — 动画巡礼行程规划",
       description: "从 Bangumi 收藏找到 Anitabi 巡礼地图，并规划 1–3 天的城市行程。",
-      home: "Traceframe 首页", tagline: "巡礼行程手帖", nav: "主导航",
+      home: "AniPins 首页", tagline: "巡礼行程手帖", nav: "主导航",
       discover: "发现", library: "收藏", trips: "行程", policy: "数据政策", plan: "规划路线",
       footer: "把喜欢的故事，排进真实旅程。", privacy: "隐私与数据删除", license: "数据与许可政策",
       contact: "联系", language: "语言",
@@ -109,11 +111,11 @@ export const copy = {
       mapped: "已映射", unmapped: "未映射", all: "全部", edit: "编辑", sharePage: "分享页",
     },
     home: {
-      eyebrow: "出发前的取景框", title1: "把喜欢的故事，", title2: "排进真实旅程。",
+      eyebrow: "出发前的地图钉", title1: "把喜欢的故事，", title2: "排进真实旅程。",
       lede: "从 Bangumi 收藏出发，筛出 Anitabi 已收录的巡礼作品，再把散落的坐标整理成一份清楚、可分享的城市行程。",
       start: "开始规划", browse: "浏览巡礼索引", feature1: "天轻行程", feature2: "城市优先", feature3: "安心分享",
-      example: "东京两日巡礼示例", exampleTitle: "东京取景散步", stepTitle: "从收藏到出发，只差三步。",
-      stepIntro: "不复制地图，也不替你决定旅程。Traceframe 只把作品、城市与路线线索整理到恰到好处。",
+      example: "东京两日巡礼示例", exampleTitle: "东京坐标散步", stepTitle: "从收藏到出发，只差三步。",
+      stepIntro: "不复制地图，也不替你决定旅程。AniPins 只把作品、城市与路线线索整理到恰到好处。",
       steps: [["连接收藏", "用 Bangumi 登录，把想看的作品变成你的巡礼候选清单。"], ["确认坐标", "对照 Anitabi 已验证覆盖，按城市找到真正可以出发的作品。"], ["排成旅程", "选择 1–3 天，让作品按城市成行，再微调顺序并分享给旅伴。"]],
       explore: "先从一座城市，找到一部作品。", openIndex: "打开城市索引",
     },
@@ -156,28 +158,28 @@ export const copy = {
     shared: { readonly: "只读分享", mapNote: "地图跳转 Anitabi", makeOwn: "自己也规划一份", index: "Presence 索引" },
     access: { title: "需要访问权限", body: "此行程仅所有者可编辑。若你有分享链接，请打开只读分享页。", open: "打开分享页", login: "登录" },
     privacy: {
-      title: "隐私与账户数据", p1: "Traceframe 保存 Bangumi 用户标识、加密 OAuth token、收藏条目和你创建的行程。浏览器只接收 httpOnly 会话 cookie；服务不会把 OAuth token 写入 localStorage。",
+      title: "隐私与账户数据", p1: "AniPins 保存 Bangumi 用户标识、加密 OAuth token、收藏条目和你创建的行程。浏览器只接收 httpOnly 会话 cookie；服务不会把 OAuth token 写入 localStorage。",
       p2: "公开分享页只显示行程元数据和 Anitabi 深链。更换或撤销分享链接后，旧链接立即失效。",
       p3: "你可以删除账户、同步收藏和全部行程。删除不可恢复，并会同时退出登录。",
       confirm: "输入 DELETE 以确认永久删除", delete: "永久删除我的全部数据", login: "登录后可在此删除账户数据。",
     },
     policyPage: {
       title: "数据与许可政策", p1: "当前 MVP 仅保存作品级 Presence 元数据和 Anitabi 地图深链，不保存或转售 Anitabi 的 POI 明细、巡礼截图或离线数据包。",
-      p2: "Anitabi 内容标注为 CC BY-NC-SA 4.0；Bangumi 条目数据按其 API 规则使用。在取得书面商业授权或建立自有合法 POI 数据前，Traceframe 不启用付费规划、联盟营销或商业数据导出。",
+      p2: "Anitabi 内容标注为 CC BY-NC-SA 4.0；Bangumi 条目数据按其 API 规则使用。在取得书面商业授权或建立自有合法 POI 数据前，AniPins 不启用付费规划、联盟营销或商业数据导出。",
       p3: "Presence 刷新使用人工确认的候选集合。遇到 Cloudflare 403/挑战会立即停止，不轮换出口继续枚举。",
     },
   },
   "zh-TW": {
     site: {
-      title: "Traceframe — 動畫聖地巡禮行程規劃", description: "從 Bangumi 收藏找到 Anitabi 聖地巡禮地圖，規劃 1–3 天的城市行程。",
-      home: "Traceframe 首頁", tagline: "聖地巡禮手帖", nav: "主要導覽", discover: "探索", library: "收藏", trips: "行程", policy: "資料政策", plan: "規劃路線",
+      title: "AniPins — 動畫聖地巡禮行程規劃", description: "從 Bangumi 收藏找到 Anitabi 聖地巡禮地圖，規劃 1–3 天的城市行程。",
+      home: "AniPins 首頁", tagline: "聖地巡禮手帖", nav: "主要導覽", discover: "探索", library: "收藏", trips: "行程", policy: "資料政策", plan: "規劃路線",
       footer: "把喜歡的故事，排進真實旅程。", privacy: "隱私與資料刪除", license: "資料與授權政策", contact: "聯絡", language: "語言",
     },
     common: { login: "使用 Bangumi 登入", oauthMissing: "OAuth 尚未設定", browsePresence: "先瀏覽 Presence", map: "Anitabi 地圖", points: "個取景點", days: "天", works: "部作品", unmappedCity: "未標示城市", mapped: "已對應", unmapped: "未對應", all: "全部", edit: "編輯", sharePage: "分享頁" },
     home: {
-      eyebrow: "出發前的取景框", title1: "把喜歡的故事，", title2: "排進真實旅程。", lede: "從 Bangumi 收藏出發，找出 Anitabi 已收錄的聖地巡禮作品，再將散落的座標整理成清楚、可分享的城市行程。",
-      start: "開始規劃", browse: "瀏覽聖地巡禮索引", feature1: "天輕旅行", feature2: "城市優先", feature3: "安心分享", example: "東京兩日聖地巡禮範例", exampleTitle: "東京取景散步", stepTitle: "從收藏到出發，只差三步。",
-      stepIntro: "不複製地圖，也不替你決定旅程。Traceframe 只將作品、城市與路線線索整理得恰到好處。", steps: [["連結收藏", "使用 Bangumi 登入，把想看的作品變成聖地巡禮候選清單。"], ["確認座標", "對照 Anitabi 已驗證的涵蓋資料，依城市找到真正能出發的作品。"], ["排成旅程", "選擇 1–3 天，讓作品依城市成行，再微調順序並分享給旅伴。"]],
+      eyebrow: "出發前的地圖釘", title1: "把喜歡的故事，", title2: "排進真實旅程。", lede: "從 Bangumi 收藏出發，找出 Anitabi 已收錄的聖地巡禮作品，再將散落的座標整理成清楚、可分享的城市行程。",
+      start: "開始規劃", browse: "瀏覽聖地巡禮索引", feature1: "天輕旅行", feature2: "城市優先", feature3: "安心分享", example: "東京兩日聖地巡禮範例", exampleTitle: "東京座標散步", stepTitle: "從收藏到出發，只差三步。",
+      stepIntro: "不複製地圖，也不替你決定旅程。AniPins 只將作品、城市與路線線索整理得恰到好處。", steps: [["連結收藏", "使用 Bangumi 登入，把想看的作品變成聖地巡禮候選清單。"], ["確認座標", "對照 Anitabi 已驗證的涵蓋資料，依城市找到真正能出發的作品。"], ["排成旅程", "選擇 1–3 天，讓作品依城市成行，再微調順序並分享給旅伴。"]],
       explore: "先從一座城市，找到一部作品。", openIndex: "開啟城市索引",
     },
     presence: { title: "Presence 索引", intro: "公開瀏覽已驗證的 Anitabi 涵蓋條目。點選地圖連結前往 Anitabi；本站不鏡像 POI 截圖。", cities: "城市", works: "作品", noCity: "目前沒有已驗證條目。請試試其他城市或查看完整索引。", noData: "目前沒有 Presence 資料。請先執行 presence:import。", faq: "收藏中有作品，但這裡沒有？", faqBody: "Presence 只收錄已驗證且有取景點的條目。未對應不代表 Anitabi 一定沒有資料，可能尚未探測或受到存取限制。登入後可在 Library 對照收藏；詳細 POI 請前往 Anitabi。", goLibrary: "前往 Library（登入後對照收藏）", plan: "從已對應作品規劃行程" },
@@ -187,13 +189,13 @@ export const copy = {
     editor: { title: "編輯行程", instruction: "調整順序後請儲存", myTrips: "我的行程", another: "再規劃一份", openShare: "開啟分享頁", readonly: "唯讀分享", rotate: "更換連結", revoke: "撤銷分享", private: "目前未公開分享。", createShare: "產生分享連結", tripTitle: "行程標題", save: "儲存變更", saving: "儲存中…", upDay: "上移一天", downDay: "下移一天", saved: "已儲存", shareFailed: "分享設定失敗", saveFailed: "儲存失敗", network: "網路錯誤，請再試一次", revoked: "舊分享連結已撤銷", generated: "已產生新的分享連結", defaultTitle: "我的聖地巡禮行程" },
     shared: { readonly: "唯讀分享", mapNote: "地圖連結將前往 Anitabi", makeOwn: "我也要規劃", index: "Presence 索引" },
     access: { title: "需要存取權限", body: "此行程只有擁有者能編輯。若你有分享連結，請開啟唯讀分享頁。", open: "開啟分享頁", login: "登入" },
-    privacy: { title: "隱私與帳戶資料", p1: "Traceframe 會儲存 Bangumi 使用者識別碼、加密的 OAuth token、收藏條目與你建立的行程。瀏覽器只會收到 httpOnly 工作階段 cookie；服務不會將 OAuth token 寫入 localStorage。", p2: "公開分享頁只顯示行程中繼資料與 Anitabi 連結。更換或撤銷分享連結後，舊連結會立即失效。", p3: "你可以刪除帳戶、同步收藏與所有行程。刪除後無法復原，並會同時登出。", confirm: "輸入 DELETE 以確認永久刪除", delete: "永久刪除我的所有資料", login: "登入後可在此刪除帳戶資料。" },
-    policyPage: { title: "資料與授權政策", p1: "目前 MVP 只儲存作品級 Presence 中繼資料與 Anitabi 地圖連結，不儲存或轉售 Anitabi 的 POI 明細、聖地巡禮截圖或離線資料包。", p2: "Anitabi 內容標示為 CC BY-NC-SA 4.0；Bangumi 條目資料依其 API 規則使用。在取得書面商業授權或建立自有合法 POI 資料前，Traceframe 不啟用付費規劃、聯盟行銷或商業資料匯出。", p3: "Presence 更新使用人工確認的候選集合。遇到 Cloudflare 403 或驗證挑戰時會立即停止，不會輪換出口繼續列舉。" },
+    privacy: { title: "隱私與帳戶資料", p1: "AniPins 會儲存 Bangumi 使用者識別碼、加密的 OAuth token、收藏條目與你建立的行程。瀏覽器只會收到 httpOnly 工作階段 cookie；服務不會將 OAuth token 寫入 localStorage。", p2: "公開分享頁只顯示行程中繼資料與 Anitabi 連結。更換或撤銷分享連結後，舊連結會立即失效。", p3: "你可以刪除帳戶、同步收藏與所有行程。刪除後無法復原，並會同時登出。", confirm: "輸入 DELETE 以確認永久刪除", delete: "永久刪除我的所有資料", login: "登入後可在此刪除帳戶資料。" },
+    policyPage: { title: "資料與授權政策", p1: "目前 MVP 只儲存作品級 Presence 中繼資料與 Anitabi 地圖連結，不儲存或轉售 Anitabi 的 POI 明細、聖地巡禮截圖或離線資料包。", p2: "Anitabi 內容標示為 CC BY-NC-SA 4.0；Bangumi 條目資料依其 API 規則使用。在取得書面商業授權或建立自有合法 POI 資料前，AniPins 不啟用付費規劃、聯盟行銷或商業資料匯出。", p3: "Presence 更新使用人工確認的候選集合。遇到 Cloudflare 403 或驗證挑戰時會立即停止，不會輪換出口繼續列舉。" },
   },
   "ja-JP": {
-    site: { title: "Traceframe — アニメ聖地巡礼プランナー", description: "BangumiのコレクションからAnitabiの聖地巡礼マップを見つけ、1〜3日間の旅程を作成します。", home: "Traceframe ホーム", tagline: "聖地巡礼手帖", nav: "メインナビゲーション", discover: "見つける", library: "コレクション", trips: "旅程", policy: "データポリシー", plan: "ルートを作る", footer: "好きな物語を、現実の旅へ。", privacy: "プライバシーとデータ削除", license: "データとライセンス", contact: "お問い合わせ", language: "言語" },
+    site: { title: "AniPins — アニメ聖地巡礼プランナー", description: "BangumiのコレクションからAnitabiの聖地巡礼マップを見つけ、1〜3日間の旅程を作成します。", home: "AniPins ホーム", tagline: "聖地巡礼手帖", nav: "メインナビゲーション", discover: "見つける", library: "コレクション", trips: "旅程", policy: "データポリシー", plan: "ルートを作る", footer: "好きな物語を、現実の旅へ。", privacy: "プライバシーとデータ削除", license: "データとライセンス", contact: "お問い合わせ", language: "言語" },
     common: { login: "Bangumiでログイン", oauthMissing: "OAuthが未設定です", browsePresence: "Presenceを見る", map: "Anitabiマップ", points: "か所", days: "日", works: "作品", unmappedCity: "都市未設定", mapped: "対応あり", unmapped: "対応なし", all: "すべて", edit: "編集", sharePage: "共有ページ" },
-    home: { eyebrow: "旅立つ前のファインダー", title1: "好きな物語を、", title2: "現実の旅へ。", lede: "BangumiのコレクションからAnitabiに登録済みの作品を探し、点在する舞台を分かりやすく共有できる都市別の旅程にまとめます。", start: "プランを作る", browse: "聖地巡礼インデックス", feature1: "日の小旅行", feature2: "都市を優先", feature3: "安心して共有", example: "東京2日間の例", exampleTitle: "東京ロケ地散歩", stepTitle: "コレクションから出発まで、3ステップ。", stepIntro: "地図を複製せず、旅を勝手に決めることもありません。Traceframeは作品、都市、ルートの手がかりを使いやすく整理します。", steps: [["コレクションを連携", "Bangumiでログインし、見たい作品を聖地巡礼の候補にします。"], ["舞台を確認", "Anitabiで確認済みの情報と照合し、実際に訪ねられる作品を都市別に探します。"], ["旅程にまとめる", "1〜3日を選び、都市別にまとめた作品の順番を調整して同行者と共有します。"]], explore: "まずは一つの都市、一つの作品から。", openIndex: "都市インデックスを開く" },
+    home: { eyebrow: "旅立つ前のピン", title1: "好きな物語を、", title2: "現実の旅へ。", lede: "BangumiのコレクションからAnitabiに登録済みの作品を探し、点在する舞台を分かりやすく共有できる都市別の旅程にまとめます。", start: "プランを作る", browse: "聖地巡礼インデックス", feature1: "日の小旅行", feature2: "都市を優先", feature3: "安心して共有", example: "東京2日間の例", exampleTitle: "東京ロケ地散歩", stepTitle: "コレクションから出発まで、3ステップ。", stepIntro: "地図を複製せず、旅を勝手に決めることもありません。AniPinsは作品、都市、ルートの手がかりを使いやすく整理します。", steps: [["コレクションを連携", "Bangumiでログインし、見たい作品を聖地巡礼の候補にします。"], ["舞台を確認", "Anitabiで確認済みの情報と照合し、実際に訪ねられる作品を都市別に探します。"], ["旅程にまとめる", "1〜3日を選び、都市別にまとめた作品の順番を調整して同行者と共有します。"]], explore: "まずは一つの都市、一つの作品から。", openIndex: "都市インデックスを開く" },
     presence: { title: "Presenceインデックス", intro: "確認済みのAnitabi対応作品を閲覧できます。地図リンクはAnitabiへ移動します。このサイトはPOI画像を複製しません。", cities: "都市", works: "作品", noCity: "確認済みの作品はありません。別の都市または全件をお試しください。", noData: "Presenceデータがありません。presence:importを先に実行してください。", faq: "コレクションの作品が見つからない場合", faqBody: "Presenceには、確認済みで舞台情報がある作品だけを掲載しています。未対応表示でもAnitabiに情報がないとは限らず、未確認またはアクセス制限の可能性があります。ログイン後はLibraryで照合できます。詳細なPOIはAnitabiをご覧ください。", goLibrary: "Libraryでコレクションと照合", plan: "対応作品から旅程を作る" },
     library: { title: "Library", loginIntro: "Bangumiでログインすると、コレクション内でAnitabiの聖地巡礼マップに対応している作品を確認できます。", publicIndex: "公開Presenceインデックスを見る", possessive: "のコレクション", sync: "コレクションを同期", showAll: "すべて表示", mappedOnly: "対応作品のみ", plan: "旅程を作る", myTrips: "自分の旅程", logout: "ログアウト", empty: "作品がありません。コレクションを同期するか、「対応作品のみ」を解除してください。", clickSync: "同期してBangumiからコレクションを取得", wish: "見たい", collect: "見た", do: "見てる", on_hold: "保留", dropped: "中断" },
     trips: { title: "自分の旅程", loginIntro: "ログインすると、保存した1〜3日間の聖地巡礼プランと共有リンクを確認できます。", intro: "共有リンクは閲覧専用で、AnitabiのPOI画像は含みません。", new: "新しい旅程", empty: "旅程はまだありません。", emptyAction: "対応作品から1〜3日間の下書きを作成します。" },
@@ -201,7 +203,7 @@ export const copy = {
     editor: { title: "旅程を編集", instruction: "順番を調整して保存してください", myTrips: "自分の旅程", another: "別の旅程を作る", openShare: "共有ページを開く", readonly: "閲覧専用リンク", rotate: "リンクを変更", revoke: "共有を解除", private: "現在は共有されていません。", createShare: "共有リンクを作成", tripTitle: "旅程タイトル", save: "変更を保存", saving: "保存中…", upDay: "前の日へ", downDay: "次の日へ", saved: "保存しました", shareFailed: "共有設定に失敗しました", saveFailed: "保存に失敗しました", network: "ネットワークエラーです。もう一度お試しください", revoked: "以前の共有リンクを無効にしました", generated: "新しい共有リンクを作成しました", defaultTitle: "聖地巡礼の旅程" },
     shared: { readonly: "閲覧専用", mapNote: "地図はAnitabiで開きます", makeOwn: "自分の旅程を作る", index: "Presenceインデックス" },
     access: { title: "アクセス権が必要です", body: "この旅程を編集できるのは所有者だけです。共有リンクをお持ちの場合は、閲覧専用ページを開いてください。", open: "共有ページを開く", login: "ログイン" },
-    privacy: { title: "プライバシーとアカウントデータ", p1: "TraceframeはBangumiのユーザー識別子、暗号化したOAuth token、コレクション項目、作成した旅程を保存します。ブラウザにはhttpOnlyセッションcookieのみを送信し、OAuth tokenをlocalStorageへ保存しません。", p2: "公開共有ページには旅程のメタデータとAnitabiリンクだけを表示します。共有リンクを変更または解除すると、以前のリンクは直ちに無効になります。", p3: "アカウント、同期したコレクション、すべての旅程を削除できます。削除は取り消せず、同時にログアウトします。", confirm: "完全に削除するにはDELETEと入力してください", delete: "自分のデータをすべて削除", login: "ログインすると、ここでアカウントデータを削除できます。" },
+    privacy: { title: "プライバシーとアカウントデータ", p1: "AniPinsはBangumiのユーザー識別子、暗号化したOAuth token、コレクション項目、作成した旅程を保存します。ブラウザにはhttpOnlyセッションcookieのみを送信し、OAuth tokenをlocalStorageへ保存しません。", p2: "公開共有ページには旅程のメタデータとAnitabiリンクだけを表示します。共有リンクを変更または解除すると、以前のリンクは直ちに無効になります。", p3: "アカウント、同期したコレクション、すべての旅程を削除できます。削除は取り消せず、同時にログアウトします。", confirm: "完全に削除するにはDELETEと入力してください", delete: "自分のデータをすべて削除", login: "ログインすると、ここでアカウントデータを削除できます。" },
     policyPage: { title: "データとライセンス", p1: "現在のMVPは作品単位のPresenceメタデータとAnitabiマップへのリンクだけを保存します。AnitabiのPOI詳細、聖地巡礼画像、オフラインデータを保存または再販売しません。", p2: "AnitabiのコンテンツはCC BY-NC-SA 4.0として表示され、Bangumiの作品データはAPIルールに従って利用します。書面による商用許諾を得るか、適法な独自POIデータを構築するまで、有料プラン、アフィリエイト、商用データ出力は提供しません。", p3: "Presenceの更新には人が確認した候補だけを使用します。Cloudflare 403やチャレンジが発生した場合は直ちに停止し、接続元を切り替えて列挙を続けません。" },
   },
 } as const;
@@ -223,6 +225,6 @@ export function localeFromCookieHeader(cookieHeader: string | null): Locale {
   const session = parts.find(([name]) => name === SESSION_COOKIE_NAME)?.[1];
   const fromSession = localeFromSessionCookie(session);
   if (fromSession) return fromSession;
-  const legacy = parts.find(([name]) => name === LOCALE_COOKIE)?.[1];
+  const legacy = parts.find(([name]) => name === LOCALE_COOKIE || name === LEGACY_LOCALE_COOKIE)?.[1];
   return isLocale(legacy) ? legacy : defaultLocale;
 }

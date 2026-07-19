@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const c = getCopy(locale).site;
   return {
-    title: { default: c.title, template: `%s · Traceframe` },
+    title: { default: c.title, template: `%s · AniPins` },
     description: c.description,
     alternates: {
       languages: {
@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <div className="topbar-inner">
               <a className="brand" href={localePath(locale)} aria-label={c.home}>
                 <span className="brand-mark" aria-hidden="true"><i /></span>
-                <span>TRACEFRAME<small>{c.tagline}</small></span>
+                <span>ANIPINS<small>{c.tagline}</small></span>
               </a>
               <nav className="nav" aria-label={c.nav}>
                 <a href={localePath(locale, "/presence")}>{c.discover}</a>
@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <footer className="site-footer">
             <div className="footer-inner">
               <div>
-                <a className="footer-brand" href={localePath(locale)}>TRACEFRAME</a>
+                <a className="footer-brand" href={localePath(locale)}>ANIPINS</a>
                 <p>{c.footer}</p>
                 <p className="footer-contact">
                   {c.contact}{" "}
@@ -87,7 +87,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <a href={localePath(locale, "/privacy")}>{c.privacy}</a> · <a href={localePath(locale, "/data-policy")}>{c.license}</a>
               </p>
               <LanguageSwitcher locale={locale} label={c.language} />
-              <p className="footer-code">TF / 2026</p>
+              <p className="footer-code">AP / 2026</p>
             </div>
           </footer>
           <AnalyticsConsent locale={locale} />

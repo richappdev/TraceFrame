@@ -1,12 +1,14 @@
 # Product analytics
 
-TraceFrame uses Google Analytics for Firebase through the Firebase Web SDK. Analytics is
+AniPins uses Google Analytics for Firebase through the Firebase Web SDK. Analytics is
 disabled when the public Firebase configuration is incomplete, and events are sent only after
 the visitor grants analytics consent in the site prompt.
 
 ## Configure
 
-In Firebase Console, enable Google Analytics and register or select the TraceFrame web app.
+In Firebase Console, enable Google Analytics and register or select the web app on project
+`antiable-traceframe`. Product branding is AniPins; the Firebase project id stays
+`antiable-traceframe`.
 Copy its public SDK configuration into these build-time environment variables:
 
 ```text

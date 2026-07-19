@@ -25,8 +25,8 @@ export function normalizeReturnPath(value: string | null | undefined): string | 
     return undefined;
   }
   try {
-    const url = new URL(value, "https://traceframe.local");
-    return url.origin === "https://traceframe.local"
+    const url = new URL(value, "https://anipins.local");
+    return url.origin === "https://anipins.local"
       ? `${url.pathname}${url.search}`
       : undefined;
   } catch {

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import {
-  ANALYTICS_CONSENT_KEY,
   hasAnalyticsConfig,
+  hasAnalyticsConsentDecision,
   setAnalyticsConsent,
 } from "@/lib/analytics";
 import type { Locale } from "@/lib/i18n";
@@ -30,9 +30,7 @@ export function AnalyticsConsent({ locale }: { locale: Locale }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(
-      hasAnalyticsConfig() && window.localStorage.getItem(ANALYTICS_CONSENT_KEY) == null,
-    );
+    setVisible(hasAnalyticsConfig() && !hasAnalyticsConsentDecision());
   }, []);
 
   function choose(value: "granted" | "denied") {

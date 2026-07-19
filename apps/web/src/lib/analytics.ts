@@ -8,7 +8,8 @@ import {
   type Analytics,
 } from "firebase/analytics";
 
-export const ANALYTICS_CONSENT_KEY = "traceframe-analytics-consent";
+export const ANALYTICS_CONSENT_KEY = "anipins-analytics-consent";
+const LEGACY_ANALYTICS_CONSENT_KEY = "traceframe-analytics-consent";
 
 export type AnalyticsEventName =
   | "anitabi_map_click"
@@ -40,9 +41,19 @@ export function hasAnalyticsConfig(config: FirebaseOptions = firebaseConfig): bo
   return Boolean(config.apiKey && config.appId && config.measurementId && config.projectId);
 }
 
+function readAnalyticsConsent(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(ANALYTICS_CONSENT_KEY)
+    ?? window.localStorage.getItem(LEGACY_ANALYTICS_CONSENT_KEY);
+}
+
 export function hasAnalyticsConsent(): boolean {
-  return typeof window !== "undefined" &&
-    window.localStorage.getItem(ANALYTICS_CONSENT_KEY) === "granted";
+  return readAnalyticsConsent() === "granted";
+}
+
+/** True when the visitor already chose grant or deny (including legacy key). */
+export function hasAnalyticsConsentDecision(): boolean {
+  return readAnalyticsConsent() != null;
 }
 
 async function initializeAnalytics(): Promise<Analytics | null> {
@@ -71,6 +82,7 @@ export function resetAnalyticsInitialization(): void {
 export function setAnalyticsConsent(value: "granted" | "denied"): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ANALYTICS_CONSENT_KEY, value);
+  window.localStorage.removeItem(LEGACY_ANALYTICS_CONSENT_KEY);
   resetAnalyticsInitialization();
 
   if (value === "denied") {
@@ -88,7 +100,7 @@ export function trackEvent(
   parameters: AnalyticsParameters = {},
 ): void {
   if (!hasAnalyticsConfig() || typeof window === "undefined") return;
-  const consent = window.localStorage.getItem(ANALYTICS_CONSENT_KEY);
+  const consent = readAnalyticsConsent();
   if (consent === "denied") return;
   if (consent !== "granted") {
     pendingEvents = [...pendingEvents.slice(-49), { eventName, parameters }];

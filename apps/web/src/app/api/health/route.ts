@@ -8,7 +8,7 @@ export async function GET() {
     await checkRuntimeReadiness();
     return NextResponse.json({
       ok: true,
-      service: "traceframe",
+      service: "anipins",
       phase: "M2",
       releaseStatus: "implemented-awaiting-acceptance",
       appStore: process.env.APP_STORE === "firestore" ? "firestore" : "sqlite-development",
@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: false,
-        service: "traceframe",
+        service: "anipins",
         phase: "M2",
         releaseStatus: "not-ready",
         error: "runtime_not_ready",

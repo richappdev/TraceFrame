@@ -59,19 +59,19 @@ export default async function HomePage({
       ) : null}
       <section className="home-hero">
         <div className="hero-wash" aria-hidden="true" />
-        <div className="viewfinder" aria-hidden="true">
-          <span className="vf-corner vf-tl" />
-          <span className="vf-corner vf-tr" />
-          <span className="vf-corner vf-bl" />
-          <span className="vf-corner vf-br" />
-          <span className="vf-meta vf-meta-tl">35mm</span>
-          <span className="vf-meta vf-meta-tr">24fps</span>
-          <span className="vf-meta vf-meta-bl">ISO 200</span>
-          <span className="vf-meta vf-meta-br">1/125</span>
+        <div className="pin-frame" aria-hidden="true">
+          <span className="pf-corner pf-tl" />
+          <span className="pf-corner pf-tr" />
+          <span className="pf-corner pf-bl" />
+          <span className="pf-corner pf-br" />
+          <span className="pf-meta pf-meta-tl">MAP</span>
+          <span className="pf-meta pf-meta-tr">PINS</span>
+          <span className="pf-meta pf-meta-bl">CITY</span>
+          <span className="pf-meta pf-meta-br">1–3D</span>
         </div>
         <div className="hero-copy">
           <p className="eyebrow"><span>{c.home.eyebrow}</span></p>
-          <p className="hero-brand">TRACEFRAME</p>
+          <p className="hero-brand">ANIPINS</p>
           <h1>
             {c.home.title1}
             <span>{c.home.title2}</span>

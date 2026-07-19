@@ -61,7 +61,7 @@ export default async function CuratedTripPage({ params }: { params: Promise<{ sl
           </div>
         </div>
         <div className="curated-ticket" aria-label={`${subjectIds.length} ${copy.works}`}>
-          <span>TRACEFRAME / CURATED</span>
+          <span>ANIPINS / CURATED</span>
           <strong>{trip.days.length}</strong>
           <small>DAYS</small>
           <div><b>{subjectIds.length}</b> {copy.works} · <b>{points}</b> {copy.points}</div>

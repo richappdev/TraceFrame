@@ -20,7 +20,7 @@ async function syncLibrary() {
   const collections = await fetchUserCollections(username, token);
   const now = new Date().toISOString();
   const store = openAppStore();
-  store.replaceLibrary(
+  await store.replaceLibrary(
     session.user.id,
     collections.map((c) => ({
       userId: session.user.id,
@@ -30,8 +30,8 @@ async function syncLibrary() {
       updatedAt: c.updated_at ?? now,
     })),
   );
-  const count = store.listLibrary(session.user.id).length;
-  store.close();
+  const count = (await store.listLibrary(session.user.id)).length;
+  await store.close();
   return { ok: true as const, synced: count };
 }
 

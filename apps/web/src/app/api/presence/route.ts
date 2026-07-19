@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import { openPresenceStore, presenceToPublic } from "@/lib/presence";
+import { parsePaginationInteger } from "@/lib/pagination";
 
 export const runtime = "nodejs";
 
 export function GET(request: Request) {
   const url = new URL(request.url);
-  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit") ?? 50)));
-  const offset = Math.max(0, Number(url.searchParams.get("offset") ?? 0));
+  const limit = parsePaginationInteger(url.searchParams.get("limit"), {
+    defaultValue: 50,
+    min: 1,
+    max: 100,
+  });
+  const offset = parsePaginationInteger(url.searchParams.get("offset"), {
+    defaultValue: 0,
+    min: 0,
+  });
+  if (limit == null || offset == null) {
+    return NextResponse.json({ error: "invalid_pagination" }, { status: 400 });
+  }
   const city = url.searchParams.get("city") ?? undefined;
 
   const store = openPresenceStore();

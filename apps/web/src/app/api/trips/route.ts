@@ -54,7 +54,7 @@ export async function GET() {
   }
   const store = openAppStore();
   try {
-    const trips = store.listTrips(session.user.id).map((t) => ({
+    const trips = (await store.listTrips(session.user.id)).map((t) => ({
       id: t.id,
       title: t.title,
       shareToken: t.shareToken,
@@ -64,7 +64,7 @@ export async function GET() {
     }));
     return NextResponse.json({ items: trips });
   } finally {
-    store.close();
+    await store.close();
   }
 }
 
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     const subjectIds = records.map((r) => r.subjectId);
 
     const store = openAppStore();
-    store.createTrip({
+    await store.createTrip({
       id: tripId,
       ownerId: session.user.id,
       title: input.title,
@@ -119,8 +119,8 @@ export async function POST(request: Request) {
       createdAt: now,
       updatedAt: now,
     });
-    const created = store.getTrip(tripId)!;
-    store.close();
+    const created = (await store.getTrip(tripId))!;
+    await store.close();
 
     if (wantsHtml) {
       return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}`), 303);

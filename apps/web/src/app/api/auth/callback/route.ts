@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     const tokenExpiresAt = Date.now() + token.expires_in * 1000;
 
     const store = openAppStore();
-    store.upsertUser({
+    await store.upsertUser({
       id: userId,
       bangumiUserId: me.id,
       username: me.username,
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
       tokenExpiresAt,
       updatedAt: new Date().toISOString(),
     });
-    store.close();
+    await store.close();
 
     const session = encodeSessionCookie({
       user: {

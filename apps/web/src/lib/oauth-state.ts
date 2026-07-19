@@ -1,10 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { getSessionSecret } from "./session";
 
 export const OAUTH_STATE_COOKIE = "antiable_oauth_state";
-
-function stateSecret(): string {
-  return process.env.SESSION_SECRET ?? "dev-only-change-me-to-a-long-random-string";
-}
 
 export interface OAuthStatePayload {
   /** CSRF nonce */
@@ -23,7 +20,7 @@ export function createOAuthState(redirectUri: string, ttlMs = 10 * 60 * 1000): s
     r: redirectUri,
   };
   const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
-  const sig = createHmac("sha256", stateSecret()).update(body).digest("base64url");
+  const sig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
   return `${body}.${sig}`;
 }
 
@@ -34,7 +31,7 @@ export function parseOAuthState(state: string | null | undefined): OAuthStatePay
   if (dot <= 0 || dot === state.length - 1) return null;
   const body = state.slice(0, dot);
   const sig = state.slice(dot + 1);
-  const expect = createHmac("sha256", stateSecret()).update(body).digest("base64url");
+  const expect = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expect);

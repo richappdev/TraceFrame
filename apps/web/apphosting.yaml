@@ -27,6 +27,10 @@ env:
     value: /tmp/antiable
     availability:
       - RUNTIME
+  - variable: APP_STORE
+    value: firestore
+    availability:
+      - RUNTIME
   - variable: BANGUMI_CLIENT_ID
     secret: BANGUMI_CLIENT_ID
     availability:

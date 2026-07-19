@@ -12,8 +12,8 @@ export default async function SharedTripPage({
 }) {
   const { token } = await params;
   const store = openAppStore();
-  const trip = store.getTripByShareToken(token);
-  store.close();
+  const trip = await store.getTripByShareToken(token);
+  await store.close();
   if (!trip) notFound();
 
   const view = hydrateTrip(trip);

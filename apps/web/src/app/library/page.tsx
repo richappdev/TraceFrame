@@ -39,7 +39,7 @@ export default async function LibraryPage({
 
   const app = openAppStore();
   const presence = openPresenceStore();
-  const library = app.listLibrary(session.user.id);
+  const library = await app.listLibrary(session.user.id);
   const joined = library.map((item) => {
     const p = presence.get(item.subjectId);
     const mapped = p != null && p.pointsLength > 0;
@@ -52,7 +52,7 @@ export default async function LibraryPage({
       mapUrl: mapped ? anitabiMapUrl(item.subjectId) : null,
     };
   });
-  app.close();
+  await app.close();
   presence.close();
 
   const view = mappedOnly ? joined.filter((j) => j.mapped) : joined;

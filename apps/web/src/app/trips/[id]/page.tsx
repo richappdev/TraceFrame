@@ -15,8 +15,8 @@ export default async function TripDetailPage({
   const { id } = await params;
   const session = await getSession();
   const store = openAppStore();
-  const trip = store.getTrip(id);
-  store.close();
+  const trip = await store.getTrip(id);
+  await store.close();
 
   if (!trip) notFound();
   if (!session?.user || session.user.id !== trip.ownerId) {

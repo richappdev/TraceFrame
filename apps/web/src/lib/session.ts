@@ -1,4 +1,11 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 
 const COOKIE_NAME = "antiable_session";
 
@@ -15,11 +22,23 @@ export interface SessionData {
   accessTokenEnc: string;
   refreshTokenEnc?: string;
   tokenExpiresAt?: number;
+  issuedAt?: number;
+  expiresAt?: number;
+}
+
+const DEVELOPMENT_SECRET = "dev-only-change-me-to-a-long-random-string";
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function getSessionSecret(): string {
+  const secret = (process.env.SESSION_SECRET ?? "").trim();
+  if (process.env.NODE_ENV === "production" && secret.length < 32) {
+    throw new Error("SESSION_SECRET must contain at least 32 characters in production");
+  }
+  return secret || DEVELOPMENT_SECRET;
 }
 
 function secretKey(): Buffer {
-  const secret = process.env.SESSION_SECRET ?? "dev-only-change-me-to-a-long-random-string";
-  return createHash("sha256").update(secret).digest();
+  return createHash("sha256").update(getSessionSecret()).digest();
 }
 
 export function encryptToken(plain: string): string {
@@ -41,10 +60,14 @@ export function decryptToken(payload: string): string {
 }
 
 export function encodeSessionCookie(data: SessionData): string {
-  const body = Buffer.from(JSON.stringify(data), "utf8").toString("base64url");
-  const sig = createHash("sha256")
-    .update(body + (process.env.SESSION_SECRET ?? "dev-only"))
-    .digest("base64url");
+  const issuedAt = Date.now();
+  const payload = {
+    ...data,
+    issuedAt: data.issuedAt ?? issuedAt,
+    expiresAt: data.expiresAt ?? issuedAt + SESSION_TTL_MS,
+  };
+  const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const sig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
   return `${body}.${sig}`;
 }
 
@@ -52,12 +75,21 @@ export function decodeSessionCookie(raw: string | undefined): SessionData | null
   if (!raw) return null;
   const [body, sig] = raw.split(".");
   if (!body || !sig) return null;
-  const expect = createHash("sha256")
-    .update(body + (process.env.SESSION_SECRET ?? "dev-only"))
-    .digest("base64url");
-  if (expect !== sig) return null;
+  const expect = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");
+  const actualBuffer = Buffer.from(sig, "base64url");
+  const expectedBuffer = Buffer.from(expect, "base64url");
+  if (
+    actualBuffer.length !== expectedBuffer.length ||
+    !timingSafeEqual(actualBuffer, expectedBuffer)
+  ) {
+    return null;
+  }
   try {
-    return JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SessionData;
+    const decoded = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as SessionData;
+    if (decoded.expiresAt != null && decoded.expiresAt <= Date.now()) return null;
+    return decoded;
   } catch {
     return null;
   }

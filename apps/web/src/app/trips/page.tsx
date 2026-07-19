@@ -32,8 +32,8 @@ export default async function TripsPage() {
   }
 
   const store = openAppStore();
-  const trips = store.listTrips(session.user.id);
-  store.close();
+  const trips = await store.listTrips(session.user.id);
+  await store.close();
 
   return (
     <section>

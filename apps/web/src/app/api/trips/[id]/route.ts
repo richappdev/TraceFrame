@@ -27,7 +27,7 @@ export async function GET(request: Request, ctx: Ctx) {
 
   const store = openAppStore();
   try {
-    const trip = store.getTrip(id);
+    const trip = await store.getTrip(id);
     if (!trip) {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
@@ -36,7 +36,7 @@ export async function GET(request: Request, ctx: Ctx) {
     }
     return NextResponse.json({ trip: hydrateTrip(trip) });
   } finally {
-    store.close();
+    await store.close();
   }
 }
 
@@ -49,7 +49,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const store = openAppStore();
   try {
-    const trip = store.getTrip(id);
+    const trip = await store.getTrip(id);
     if (!trip) {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
@@ -78,14 +78,14 @@ export async function PATCH(request: Request, ctx: Ctx) {
       subjectIdsJson = JSON.stringify([...new Set(days.flatMap((d) => d.subjectIds))]);
     }
 
-    store.updateTrip(id, {
+    await store.updateTrip(id, {
       title: body.title?.trim() || undefined,
       daysJson,
       subjectIdsJson,
       updatedAt: new Date().toISOString(),
     });
 
-    const updated = store.getTrip(id)!;
+    const updated = (await store.getTrip(id))!;
     return NextResponse.json({ ok: true, trip: hydrateTrip(updated) });
   } catch (err) {
     console.error(err);
@@ -94,6 +94,6 @@ export async function PATCH(request: Request, ctx: Ctx) {
       { status: 500 },
     );
   } finally {
-    store.close();
+    await store.close();
   }
 }

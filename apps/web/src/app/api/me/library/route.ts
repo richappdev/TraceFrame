@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const app = openAppStore();
   const presence = openPresenceStore();
   try {
-    let items = app.listLibrary(session.user.id);
+    let items = await app.listLibrary(session.user.id);
     if (typeFilter) {
       items = items.filter((i) => i.collectionType === typeFilter);
     }
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       items: filtered,
     });
   } finally {
-    app.close();
+    await app.close();
     presence.close();
   }
 }

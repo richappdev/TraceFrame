@@ -67,6 +67,9 @@ App Hosting requires the **Blaze** plan on project `antiable-traceframe`:
 
 https://console.firebase.google.com/project/antiable-traceframe/usage/details
 
+Create a Cloud Firestore database in the Firebase project before the first rollout. Production
+uses Firestore for durable users, libraries, and trips; local development continues to use SQLite.
+
 ```bash
 # 1. Create backend (once, after Blaze)
 npx -y firebase-tools@latest apphosting:backends:create \

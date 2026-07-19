@@ -38,7 +38,7 @@ export default async function NewTripPage({
 
   const app = openAppStore();
   const presence = openPresenceStore();
-  const library = app.listLibrary(session.user.id);
+  const library = await app.listLibrary(session.user.id);
   const mapped = library
     .map((item) => {
       const p = presence.get(item.subjectId);
@@ -65,7 +65,7 @@ export default async function NewTripPage({
   const picks = mapped.length > 0 ? mapped : fallback;
   const usingFallback = mapped.length === 0 && fallback.length > 0;
 
-  app.close();
+  await app.close();
   presence.close();
 
   const errorMsg =

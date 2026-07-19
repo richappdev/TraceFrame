@@ -247,6 +247,19 @@ export class AppStore {
     return true;
   }
 
+  deleteUserData(userId: string): void {
+    this.db.exec("BEGIN");
+    try {
+      this.db.prepare(`DELETE FROM library_items WHERE user_id = ?`).run(userId);
+      this.db.prepare(`DELETE FROM trips WHERE owner_id = ?`).run(userId);
+      this.db.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
+      this.db.exec("COMMIT");
+    } catch (err) {
+      this.db.exec("ROLLBACK");
+      throw err;
+    }
+  }
+
   close(): void {
     this.db.close();
   }

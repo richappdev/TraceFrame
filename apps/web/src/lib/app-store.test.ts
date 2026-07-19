@@ -27,6 +27,8 @@ describe("AppStore trips", () => {
     });
     expect(ok).toBe(true);
     expect(store.getTrip("trip-1")?.title).toBe("京都一日");
+    store.deleteUserData("bgm:1");
+    expect(store.listTrips("bgm:1")).toHaveLength(0);
     store.close();
   });
 });

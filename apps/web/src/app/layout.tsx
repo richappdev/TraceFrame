@@ -72,6 +72,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <div>
                 <a className="footer-brand" href={localePath(locale)}>TRACEFRAME</a>
                 <p>{c.footer}</p>
+                <p className="footer-contact">
+                  {c.contact}{" "}
+                  <a href="mailto:app.developer.rich@gmail.com">app.developer.rich@gmail.com</a>
+                </p>
               </div>
               <p className="data-credit">
                 {locale === "ja-JP" ? "地図データ：" : locale === "zh-TW" ? "地圖資料來自 " : "地图数据来自 "}

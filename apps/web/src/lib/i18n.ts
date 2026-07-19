@@ -78,7 +78,7 @@ export const copy = {
       home: "Traceframe 首页", tagline: "巡礼行程手帖", nav: "主导航",
       discover: "发现", library: "收藏", trips: "行程", policy: "数据政策", plan: "规划路线",
       footer: "把喜欢的故事，排进真实旅程。", privacy: "隐私与数据删除", license: "数据与许可政策",
-      language: "语言",
+      contact: "联系", language: "语言",
     },
     common: {
       login: "使用 Bangumi 登录", oauthMissing: "OAuth 未配置", browsePresence: "先浏览 Presence",
@@ -148,7 +148,7 @@ export const copy = {
     site: {
       title: "Traceframe — 動畫聖地巡禮行程規劃", description: "從 Bangumi 收藏找到 Anitabi 聖地巡禮地圖，規劃 1–3 天的城市行程。",
       home: "Traceframe 首頁", tagline: "聖地巡禮手帖", nav: "主要導覽", discover: "探索", library: "收藏", trips: "行程", policy: "資料政策", plan: "規劃路線",
-      footer: "把喜歡的故事，排進真實旅程。", privacy: "隱私與資料刪除", license: "資料與授權政策", language: "語言",
+      footer: "把喜歡的故事，排進真實旅程。", privacy: "隱私與資料刪除", license: "資料與授權政策", contact: "聯絡", language: "語言",
     },
     common: { login: "使用 Bangumi 登入", oauthMissing: "OAuth 尚未設定", browsePresence: "先瀏覽 Presence", map: "Anitabi 地圖", points: "個取景點", days: "天", works: "部作品", unmappedCity: "未標示城市", mapped: "已對應", unmapped: "未對應", all: "全部", edit: "編輯", sharePage: "分享頁" },
     home: {
@@ -168,7 +168,7 @@ export const copy = {
     policyPage: { title: "資料與授權政策", p1: "目前 MVP 只儲存作品級 Presence 中繼資料與 Anitabi 地圖連結，不儲存或轉售 Anitabi 的 POI 明細、聖地巡禮截圖或離線資料包。", p2: "Anitabi 內容標示為 CC BY-NC-SA 4.0；Bangumi 條目資料依其 API 規則使用。在取得書面商業授權或建立自有合法 POI 資料前，Traceframe 不啟用付費規劃、聯盟行銷或商業資料匯出。", p3: "Presence 更新使用人工確認的候選集合。遇到 Cloudflare 403 或驗證挑戰時會立即停止，不會輪換出口繼續列舉。" },
   },
   "ja-JP": {
-    site: { title: "Traceframe — アニメ聖地巡礼プランナー", description: "BangumiのコレクションからAnitabiの聖地巡礼マップを見つけ、1〜3日間の旅程を作成します。", home: "Traceframe ホーム", tagline: "聖地巡礼手帖", nav: "メインナビゲーション", discover: "見つける", library: "コレクション", trips: "旅程", policy: "データポリシー", plan: "ルートを作る", footer: "好きな物語を、現実の旅へ。", privacy: "プライバシーとデータ削除", license: "データとライセンス", language: "言語" },
+    site: { title: "Traceframe — アニメ聖地巡礼プランナー", description: "BangumiのコレクションからAnitabiの聖地巡礼マップを見つけ、1〜3日間の旅程を作成します。", home: "Traceframe ホーム", tagline: "聖地巡礼手帖", nav: "メインナビゲーション", discover: "見つける", library: "コレクション", trips: "旅程", policy: "データポリシー", plan: "ルートを作る", footer: "好きな物語を、現実の旅へ。", privacy: "プライバシーとデータ削除", license: "データとライセンス", contact: "お問い合わせ", language: "言語" },
     common: { login: "Bangumiでログイン", oauthMissing: "OAuthが未設定です", browsePresence: "Presenceを見る", map: "Anitabiマップ", points: "か所", days: "日", works: "作品", unmappedCity: "都市未設定", mapped: "対応あり", unmapped: "対応なし", all: "すべて", edit: "編集", sharePage: "共有ページ" },
     home: { eyebrow: "旅立つ前のファインダー", title1: "好きな物語を、", title2: "現実の旅へ。", lede: "BangumiのコレクションからAnitabiに登録済みの作品を探し、点在する舞台を分かりやすく共有できる都市別の旅程にまとめます。", start: "プランを作る", browse: "聖地巡礼インデックス", feature1: "日の小旅行", feature2: "都市を優先", feature3: "安心して共有", example: "東京2日間の例", exampleTitle: "東京ロケ地散歩", stepTitle: "コレクションから出発まで、3ステップ。", stepIntro: "地図を複製せず、旅を勝手に決めることもありません。Traceframeは作品、都市、ルートの手がかりを使いやすく整理します。", steps: [["コレクションを連携", "Bangumiでログインし、見たい作品を聖地巡礼の候補にします。"], ["舞台を確認", "Anitabiで確認済みの情報と照合し、実際に訪ねられる作品を都市別に探します。"], ["旅程にまとめる", "1〜3日を選び、都市別にまとめた作品の順番を調整して同行者と共有します。"]], explore: "まずは一つの都市、一つの作品から。", openIndex: "都市インデックスを開く" },
     presence: { title: "Presenceインデックス", intro: "確認済みのAnitabi対応作品を閲覧できます。地図リンクはAnitabiへ移動します。このサイトはPOI画像を複製しません。", cities: "都市", works: "作品", noCity: "確認済みの作品はありません。別の都市または全件をお試しください。", noData: "Presenceデータがありません。presence:importを先に実行してください。", faq: "コレクションの作品が見つからない場合", faqBody: "Presenceには、確認済みで舞台情報がある作品だけを掲載しています。未対応表示でもAnitabiに情報がないとは限らず、未確認またはアクセス制限の可能性があります。ログイン後はLibraryで照合できます。詳細なPOIはAnitabiをご覧ください。", goLibrary: "Libraryでコレクションと照合", plan: "対応作品から旅程を作る" },

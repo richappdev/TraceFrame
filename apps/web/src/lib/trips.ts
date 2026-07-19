@@ -42,6 +42,7 @@ export type HydratedTrip = {
   id: string;
   ownerId: string;
   title: string;
+  sourceTemplate: string | null;
   shareToken: string | null;
   subjectIds: number[];
   createdAt: string;
@@ -63,6 +64,7 @@ export function hydrateTrip(trip: TripRow): HydratedTrip {
       id: trip.id,
       ownerId: trip.ownerId,
       title: trip.title,
+      sourceTemplate: trip.sourceTemplate,
       shareToken: trip.shareToken,
       subjectIds,
       createdAt: trip.createdAt,

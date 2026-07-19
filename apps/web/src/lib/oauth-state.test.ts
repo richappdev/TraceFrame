@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { createOAuthState, parseOAuthState, verifyOAuthState } from "./oauth-state";
+import {
+  createOAuthState,
+  normalizeReturnPath,
+  parseOAuthState,
+  verifyOAuthState,
+} from "./oauth-state";
 
 const PREV_SECRET = process.env.SESSION_SECRET;
 
@@ -32,5 +37,22 @@ describe("oauth state", () => {
 
     const expired = createOAuthState("https://app.example.com/api/auth/callback", -1000);
     expect(verifyOAuthState(expired)).toBe(false);
+  });
+
+  it("preserves a safe local continuation path", () => {
+    process.env.SESSION_SECRET = "unit-test-session-secret-32chars!!";
+    const state = createOAuthState(
+      "https://app.example.com/api/auth/callback",
+      60_000,
+      "zh-TW",
+      "/zh-TW/trips/new?template=kyoto-uji-classics",
+    );
+    expect(parseOAuthState(state)?.p).toBe("/zh-TW/trips/new?template=kyoto-uji-classics");
+  });
+
+  it("rejects external or ambiguous continuation paths", () => {
+    expect(normalizeReturnPath("https://evil.example/path")).toBeUndefined();
+    expect(normalizeReturnPath("//evil.example/path")).toBeUndefined();
+    expect(normalizeReturnPath("/\\evil")).toBeUndefined();
   });
 });

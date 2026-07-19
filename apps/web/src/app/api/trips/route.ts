@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "node:crypto";
 import { getSession } from "@/lib/auth";
 import { openAppStore } from "@/lib/db";
+import { getCuratedTrip } from "@/lib/curated-trips";
 import { buildTripDays, clampDayCount } from "@/lib/planner";
 import { openPresenceStore } from "@/lib/presence";
 import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
@@ -25,10 +26,11 @@ async function parseCreateInput(request: Request, rawBody: string): Promise<{
   title: string;
   subjectIds: number[];
   dayCount: number;
+  templateId?: string;
 }> {
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
-    let body: { title?: string; subjectIds?: unknown; dayCount?: unknown };
+    let body: { title?: string; subjectIds?: unknown; dayCount?: unknown; template?: unknown };
     try {
       body = JSON.parse(rawBody) as typeof body;
     } catch {
@@ -38,6 +40,9 @@ async function parseCreateInput(request: Request, rawBody: string): Promise<{
       title: normalizeTripTitle(body.title),
       subjectIds: parseSubjectIdsFromBody(body),
       dayCount: clampDayCount(body.dayCount),
+      templateId: typeof body.template === "string" && getCuratedTrip(body.template)
+        ? body.template
+        : undefined,
     };
   }
 
@@ -50,6 +55,9 @@ async function parseCreateInput(request: Request, rawBody: string): Promise<{
     title: normalizeTripTitle(form.get("title")),
     subjectIds: ids,
     dayCount: clampDayCount(form.get("dayCount")),
+    templateId: form.get("template") && getCuratedTrip(form.get("template")!)
+      ? form.get("template")!
+      : undefined,
   };
 }
 
@@ -123,6 +131,7 @@ export async function POST(request: Request) {
       id: tripId,
       ownerId: session.user.id,
       title: input.title,
+      sourceTemplate: input.templateId ?? null,
       shareToken,
       daysJson: JSON.stringify(days),
       subjectIdsJson: JSON.stringify(subjectIds),
@@ -133,7 +142,9 @@ export async function POST(request: Request) {
     await store.close();
 
     if (wantsHtml) {
-      return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}?created=1`), 303);
+      const createdQuery = new URLSearchParams({ created: "1" });
+      if (input.templateId) createdQuery.set("template", input.templateId);
+      return NextResponse.redirect(absoluteUrl(request, `/trips/${tripId}?${createdQuery}`), 303);
     }
     return NextResponse.json({ ok: true, trip: hydrateTrip(created) }, { status: 201 });
   } catch (err) {

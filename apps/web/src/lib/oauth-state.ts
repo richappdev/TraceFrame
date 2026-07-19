@@ -16,15 +16,37 @@ export interface OAuthStatePayload {
   r: string;
   /** Interface locale to restore after the external OAuth round trip. */
   l?: string;
+  /** Optional same-origin path to continue to after login. */
+  p?: string;
+}
+
+export function normalizeReturnPath(value: string | null | undefined): string | undefined {
+  if (!value || value.length > 500 || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return undefined;
+  }
+  try {
+    const url = new URL(value, "https://traceframe.local");
+    return url.origin === "https://traceframe.local"
+      ? `${url.pathname}${url.search}`
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Create CSRF state embedding redirect_uri: `payload.sig`. */
-export function createOAuthState(redirectUri: string, ttlMs = 10 * 60 * 1000, locale?: string): string {
+export function createOAuthState(
+  redirectUri: string,
+  ttlMs = 10 * 60 * 1000,
+  locale?: string,
+  returnPath?: string,
+): string {
   const payload: OAuthStatePayload = {
     n: randomBytes(16).toString("hex"),
     e: Date.now() + ttlMs,
     r: redirectUri,
     l: locale,
+    p: normalizeReturnPath(returnPath),
   };
   const body = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   const sig = createHmac("sha256", getSessionSecret()).update(body).digest("base64url");

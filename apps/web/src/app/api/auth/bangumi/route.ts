@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildAuthorizeUrl, getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
-import { createOAuthState, OAUTH_STATE_COOKIE } from "@/lib/oauth-state";
+import { createOAuthState, normalizeReturnPath, OAUTH_STATE_COOKIE } from "@/lib/oauth-state";
 import { getRequestOrigin } from "@/lib/request-origin";
 import { sessionCookieOptions } from "@/lib/session";
 import { getCopy, isLocale, localeFromCookieHeader, type Locale } from "@/lib/i18n";
@@ -49,7 +49,9 @@ function interstitialRedirect(authorizeUrl: string, locale: Locale): NextRespons
 }
 
 export function GET(request: Request) {
-  const requestedLocale = new URL(request.url).searchParams.get("locale");
+  const requestUrl = new URL(request.url);
+  const requestedLocale = requestUrl.searchParams.get("locale");
+  const returnPath = normalizeReturnPath(requestUrl.searchParams.get("next"));
   const locale = isLocale(requestedLocale) ? requestedLocale : localeFromCookieHeader(request.headers.get("cookie"));
   const { configured, redirectUri: configuredRedirect } = getBangumiOAuthConfig();
   if (!configured) {
@@ -73,7 +75,7 @@ export function GET(request: Request) {
   // Use the one callback registered with Bangumi. Alternate/rollback hosts are
   // redirected above so the temporary state cookie is created on this host.
   const redirectUri = configuredRedirect;
-  const state = createOAuthState(redirectUri, undefined, locale);
+  const state = createOAuthState(redirectUri, undefined, locale, returnPath);
   const url = buildAuthorizeUrl(state, redirectUri);
   if (!url.includes("redirect_uri=")) {
     return NextResponse.json(

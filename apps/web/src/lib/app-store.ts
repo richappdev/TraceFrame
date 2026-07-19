@@ -28,6 +28,7 @@ export interface TripRow {
   id: string;
   ownerId: string;
   title: string;
+  sourceTemplate: string | null;
   shareToken: string | null;
   daysJson: string;
   subjectIdsJson: string;
@@ -63,6 +64,7 @@ CREATE TABLE IF NOT EXISTS trips (
   id TEXT PRIMARY KEY,
   owner_id TEXT NOT NULL,
   title TEXT NOT NULL,
+  source_template TEXT,
   share_token TEXT UNIQUE,
   days_json TEXT NOT NULL,
   subject_ids_json TEXT NOT NULL,
@@ -83,6 +85,12 @@ export class AppStore {
     }
     this.db = new DatabaseSync(dbPath);
     this.db.exec(SCHEMA);
+    const tripColumns = this.db.prepare("PRAGMA table_info(trips)").all() as Array<{
+      name: string;
+    }>;
+    if (!tripColumns.some((column) => column.name === "source_template")) {
+      this.db.exec("ALTER TABLE trips ADD COLUMN source_template TEXT");
+    }
   }
 
   upsertUser(user: UserRow): void {
@@ -176,13 +184,14 @@ export class AppStore {
     this.db
       .prepare(
         `INSERT INTO trips (
-          id, owner_id, title, share_token, days_json, subject_ids_json, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          id, owner_id, title, source_template, share_token, days_json, subject_ids_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         trip.id,
         trip.ownerId,
         trip.title,
+        trip.sourceTemplate,
         trip.shareToken,
         trip.daysJson,
         trip.subjectIdsJson,
@@ -270,6 +279,7 @@ function tripFromRow(row: Record<string, unknown>): TripRow {
     id: String(row.id),
     ownerId: String(row.owner_id),
     title: String(row.title ?? ""),
+    sourceTemplate: row.source_template == null ? null : String(row.source_template),
     shareToken: row.share_token == null ? null : String(row.share_token),
     daysJson: String(row.days_json ?? "[]"),
     subjectIdsJson: String(row.subject_ids_json ?? "[]"),

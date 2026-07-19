@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TrackedTripForm } from "@/components/AnalyticsEvent";
 import { getSession } from "@/lib/auth";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
+import { curatedTripSubjectIds, getCuratedTrip } from "@/lib/curated-trips";
 import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
@@ -12,13 +13,18 @@ export const dynamic = "force-dynamic";
 export default async function NewTripPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; template?: string }>;
 }) {
   const session = await getSession();
   const locale = await getLocale();
   const c = getCopy(locale);
   const { configured } = getBangumiOAuthConfig();
   const params = await searchParams;
+  const template = params.template ? getCuratedTrip(params.template) : undefined;
+  const templateIds = new Set(template ? curatedTripSubjectIds(template) : []);
+  const templatePath = template
+    ? `${localePath(locale, "/trips/new")}?template=${encodeURIComponent(template.slug)}`
+    : localePath(locale, "/trips/new");
 
   if (!session?.user) {
     return (
@@ -27,7 +33,7 @@ export default async function NewTripPage({
         <p>{c.newTrip.loginIntro}</p>
         <div className="cta-row">
           {configured ? (
-            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}`}>
+            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}&next=${encodeURIComponent(templatePath)}`}>
               {c.common.login}
             </a>
           ) : (
@@ -67,7 +73,23 @@ export default async function NewTripPage({
           pointsLength: p.pointsLength,
         }))
       : [];
-  const picks = mapped.length > 0 ? mapped : fallback;
+  const basePicks = mapped.length > 0 ? mapped : fallback;
+  const templatePicks = template
+    ? curatedTripSubjectIds(template).flatMap((subjectId) => {
+        const p = presence.get(subjectId);
+        return p && p.pointsLength > 0
+          ? [{
+              subjectId,
+              title: localizedTitle(p, locale),
+              city: localizeCity(p.city || "", locale),
+              pointsLength: p.pointsLength,
+            }]
+          : [];
+      })
+    : [];
+  const picksById = new Map(basePicks.map((pick) => [pick.subjectId, pick]));
+  for (const pick of templatePicks) picksById.set(pick.subjectId, pick);
+  const picks = [...picksById.values()];
   const usingFallback = mapped.length === 0 && fallback.length > 0;
 
   await app.close();
@@ -91,7 +113,8 @@ export default async function NewTripPage({
           {c.newTrip.noPicks} <Link href={localePath(locale, "/library")}>Library</Link>
         </p>
       ) : (
-        <TrackedTripForm>
+        <TrackedTripForm templateId={template?.slug}>
+          {template ? <input type="hidden" name="template" value={template.slug} /> : null}
           {usingFallback ? (
             <p className="empty">
               {c.newTrip.fallback}
@@ -100,12 +123,12 @@ export default async function NewTripPage({
 
           <label className="field">
             {c.newTrip.tripTitle}
-            <input type="text" name="title" defaultValue={c.editor.defaultTitle} placeholder={c.newTrip.placeholder} maxLength={80} />
+            <input type="text" name="title" defaultValue={template?.title[locale] ?? c.editor.defaultTitle} placeholder={c.newTrip.placeholder} maxLength={80} />
           </label>
 
           <label className="field">
             {c.newTrip.dayCount}
-            <select name="dayCount" defaultValue="2">
+            <select name="dayCount" defaultValue={String(template?.days.length ?? 2)}>
               <option value="1">1 {c.common.days}</option>
               <option value="2">2 {c.common.days}</option>
               <option value="3">3 {c.common.days}</option>
@@ -118,7 +141,7 @@ export default async function NewTripPage({
               {picks.map((item) => (
                 <li key={item.subjectId}>
                   <label>
-                    <input type="checkbox" name="subjectId" value={item.subjectId} />
+                    <input type="checkbox" name="subjectId" value={item.subjectId} defaultChecked={templateIds.has(item.subjectId)} />
                     <span>
                       <strong>{item.title}</strong>
                       <div className="meta">

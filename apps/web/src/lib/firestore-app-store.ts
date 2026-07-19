@@ -42,6 +42,7 @@ function tripFromData(data: DocumentData): TripRow {
     id: String(data.id),
     ownerId: String(data.ownerId),
     title: String(data.title ?? ""),
+    sourceTemplate: data.sourceTemplate == null ? null : String(data.sourceTemplate),
     shareToken: data.shareToken == null ? null : String(data.shareToken),
     daysJson: String(data.daysJson ?? "[]"),
     subjectIdsJson: String(data.subjectIdsJson ?? "[]"),

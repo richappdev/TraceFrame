@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { CuratedTripCard } from "@/components/CuratedTripCard";
+import { curatedCopy, curatedTrips, curatedTripSubjectIds } from "@/lib/curated-trips";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { openPresenceStore } from "@/lib/presence";
 
 export default async function HomePage({
   searchParams,
@@ -10,6 +13,14 @@ export default async function HomePage({
   const { auth } = await searchParams;
   const locale = await getLocale();
   const c = getCopy(locale);
+  const curated = curatedCopy(locale);
+  const featuredTrips = curatedTrips.slice(0, 3);
+  const presence = openPresenceStore();
+  const featuredPoints = new Map(featuredTrips.map((trip) => [
+    trip.slug,
+    curatedTripSubjectIds(trip).reduce((sum, id) => sum + (presence.get(id)?.pointsLength ?? 0), 0),
+  ]));
+  presence.close();
   const example = locale === "ja-JP"
     ? [["新宿・四谷", "君の名は。 · 8か所"], ["須賀神社", "徒歩18分 · Anitabiマップ"], ["渋谷・三軒茶屋", "天気の子 · 12か所"]]
     : locale === "zh-TW"
@@ -110,12 +121,34 @@ export default async function HomePage({
         </ol>
       </section>
 
+      <section className="curated-feature" aria-labelledby="curated-title">
+        <div className="curated-feature-head">
+          <div>
+            <p className="eyebrow">READY-MADE ROUTES / EDITOR&apos;S PICKS</p>
+            <h2 id="curated-title">{curated.featured}</h2>
+          </div>
+          <Link className="text-link" href={localePath(locale, "/trips/explore")}>{curated.viewAll} ↗</Link>
+        </div>
+        <div className="curated-mini-grid">
+          {featuredTrips.map((trip) => (
+            <CuratedTripCard
+              key={trip.slug}
+              trip={trip}
+              locale={locale}
+              points={featuredPoints.get(trip.slug) ?? 0}
+              openLabel={curated.open}
+              source="homepage"
+            />
+          ))}
+        </div>
+      </section>
+
       <section className="explore-banner">
         <div>
           <p className="eyebrow">NOT SURE WHERE TO GO?</p>
           <h2>{c.home.explore}</h2>
         </div>
-        <Link className="text-link" href={localePath(locale, "/presence")}>{c.home.openIndex} <span aria-hidden="true">↗</span></Link>
+        <Link className="text-link" href={localePath(locale, "/trips/explore")}>{curated.viewAll} <span aria-hidden="true">↗</span></Link>
       </section>
     </div>
   );

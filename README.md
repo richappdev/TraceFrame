@@ -40,6 +40,8 @@ in [`docs/analytics.md`](docs/analytics.md).
 | `/presence` | Guest-friendly mapped titles (city filter via `?city=`) |
 | `/library` | Collection × presence join (after OAuth) |
 | `/trips` | Owner trip list |
+| `/trips/explore` | Public curated anime-trip gallery |
+| `/trips/explore/:slug` | Curated title/city itinerary with copy-to-planner action |
 | `/trips/new` | Build 1–3 day city trip from mapped titles |
 | `/trips/:id` | Trip editor (reorder + save) + share link |
 | `/t/:token` | Read-only shared trip |

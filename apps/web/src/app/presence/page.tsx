@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnalyticsLink } from "@/components/AnalyticsEvent";
+import { curatedCopy, curatedTripsForSubject } from "@/lib/curated-trips";
 import { openPresenceStore, presenceToPublic } from "@/lib/presence";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
@@ -14,6 +15,7 @@ export default async function PresencePage({
   const params = await searchParams;
   const locale = await getLocale();
   const c = getCopy(locale);
+  const curated = curatedCopy(locale);
   const city = params.city?.trim() || undefined;
 
   const store = openPresenceStore();
@@ -30,6 +32,14 @@ export default async function PresencePage({
         <p>
           {c.presence.intro} ({total} {c.common.works}{city ? ` · ${filteredTotal} ${c.common.works}` : ""})
         </p>
+      </div>
+
+      <div className="explore-banner" style={{ margin: "0 0 2rem" }}>
+        <div>
+          <p className="eyebrow">CURATED ANIME TRIPS</p>
+          <h2>{curated.featured}</h2>
+        </div>
+        <Link className="text-link" href={localePath(locale, "/trips/explore")}>{curated.viewAll} ↗</Link>
       </div>
 
       <h2 className="section-title">{c.presence.cities}</h2>
@@ -57,28 +67,40 @@ export default async function PresencePage({
         </p>
       ) : (
         <ul className="lib-list">
-          {items.map((item) => (
-            <li key={item.subjectId} className="lib-item">
-              <div>
-                <strong>{localizedTitle(item, locale)}</strong>
-                <div className="meta">
-                  {localizeCity(item.city, locale) || "—"} · {item.pointsLength} {c.common.points}
+          {items.map((item) => {
+            const relatedTrips = curatedTripsForSubject(item.subjectId);
+            return (
+              <li key={item.subjectId} className="lib-item">
+                <div>
+                  <strong>{localizedTitle(item, locale)}</strong>
+                  <div className="meta">
+                    {localizeCity(item.city, locale) || "—"} · {item.pointsLength} {c.common.points}
+                  </div>
+                  {relatedTrips.map((trip) => (
+                    <Link
+                      className="presence-trip-link"
+                      href={localePath(locale, `/trips/explore/${trip.slug}`)}
+                      key={trip.slug}
+                    >
+                      {curated.open}: {trip.title[locale]} <span aria-hidden="true">↗</span>
+                    </Link>
+                  ))}
                 </div>
-              </div>
-              <div className="lib-actions">
-                <span className="badge mapped">{c.common.mapped}</span>
-                <AnalyticsLink
-                  href={item.mapUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  eventName="anitabi_map_click"
-                  eventParameters={{ subject_id: String(item.subjectId), source: "presence" }}
-                >
-                  {c.common.map}
-                </AnalyticsLink>
-              </div>
-            </li>
-          ))}
+                <div className="lib-actions">
+                  <span className="badge mapped">{c.common.mapped}</span>
+                  <AnalyticsLink
+                    href={item.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    eventName="anitabi_map_click"
+                    eventParameters={{ subject_id: String(item.subjectId), source: "presence" }}
+                  >
+                    {c.common.map}
+                  </AnalyticsLink>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
 

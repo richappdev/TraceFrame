@@ -32,6 +32,7 @@ export default async function SharedTripPage({
           view_type: "shared",
           duration_days: view.days.length,
           subject_count: view.subjectIds.length,
+          ...(view.sourceTemplate ? { template_id: view.sourceTemplate } : {}),
         }}
       />
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
@@ -73,6 +74,7 @@ export default async function SharedTripPage({
                       trip_id: view.id,
                       subject_id: String(t.subjectId),
                       source: "shared_trip",
+                      ...(view.sourceTemplate ? { template_id: view.sourceTemplate } : {}),
                     }}
                   >
                     {c.common.map}

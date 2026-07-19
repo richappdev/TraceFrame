@@ -15,10 +15,12 @@ export function TripEditor({
   trip,
   locale,
   justCreated = false,
+  sourceTemplate,
 }: {
   trip: HydratedTrip;
   locale: Locale;
   justCreated?: boolean;
+  sourceTemplate?: string;
 }) {
   const c = getCopy(locale);
   const [title, setTitle] = useState(trip.title);
@@ -27,6 +29,7 @@ export function TripEditor({
   const [status, setStatus] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const sharePath = shareToken ? localePath(locale, `/t/${shareToken}`) : null;
+  const templateId = sourceTemplate ?? trip.sourceTemplate ?? undefined;
 
   useEffect(() => {
     trackEvent("trip_view", {
@@ -34,18 +37,21 @@ export function TripEditor({
       view_type: "owner",
       duration_days: trip.days.length,
       subject_count: trip.subjectIds.length,
+      ...(templateId ? { template_id: templateId } : {}),
     });
     if (justCreated) {
       trackEvent("trip_saved", {
         trip_id: trip.id,
         duration_days: trip.days.length,
         subject_count: trip.subjectIds.length,
+        ...(templateId ? { template_id: templateId } : {}),
       });
       const url = new URL(window.location.href);
       url.searchParams.delete("created");
+      url.searchParams.delete("template");
       window.history.replaceState(window.history.state, "", url);
     }
-  }, [justCreated, trip.days.length, trip.id, trip.subjectIds.length]);
+  }, [justCreated, templateId, trip.days.length, trip.id, trip.subjectIds.length]);
 
   function updateShare(shareAction: "rotate" | "revoke") {
     startTransition(async () => {
@@ -67,7 +73,11 @@ export function TripEditor({
         setShareToken(body.trip.shareToken);
         setStatus(shareAction === "revoke" ? c.editor.revoked : c.editor.generated);
         if (shareAction === "rotate") {
-          trackEvent("trip_shared", { trip_id: trip.id, share_action: "link_created" });
+          trackEvent("trip_shared", {
+            trip_id: trip.id,
+            share_action: "link_created",
+            ...(templateId ? { template_id: templateId } : {}),
+          });
         }
       } catch {
         setStatus(c.editor.network);
@@ -104,6 +114,7 @@ export function TripEditor({
           trip_id: trip.id,
           duration_days: body.trip.days.length,
           subject_count: body.trip.subjectIds.length,
+          ...(templateId ? { template_id: templateId } : {}),
         });
       } catch {
         setStatus(c.editor.network);
@@ -130,7 +141,11 @@ export function TripEditor({
               className="btn"
               href={sharePath}
               target="_blank"
-              onClick={() => trackEvent("trip_shared", { trip_id: trip.id, share_action: "open_link" })}
+              onClick={() => trackEvent("trip_shared", {
+                trip_id: trip.id,
+                share_action: "open_link",
+                ...(templateId ? { template_id: templateId } : {}),
+              })}
             >
               {c.editor.openShare}
             </Link>
@@ -287,6 +302,7 @@ export function TripEditor({
                       trip_id: trip.id,
                       subject_id: String(t.subjectId),
                       source: "trip_editor",
+                      ...(templateId ? { template_id: templateId } : {}),
                     })}
                   >
                     {c.common.map}

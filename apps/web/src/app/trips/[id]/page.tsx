@@ -14,10 +14,10 @@ export default async function TripDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; template?: string }>;
 }) {
   const { id } = await params;
-  const { created } = await searchParams;
+  const { created, template } = await searchParams;
   const locale = await getLocale();
   const c = getCopy(locale);
   const session = await getSession();
@@ -46,5 +46,10 @@ export default async function TripDetailPage({
     notFound();
   }
 
-  return <TripEditor trip={hydrateTrip(trip)} locale={locale} justCreated={created === "1"} />;
+  return <TripEditor
+    trip={hydrateTrip(trip)}
+    locale={locale}
+    justCreated={created === "1"}
+    sourceTemplate={trip.sourceTemplate ?? template}
+  />;
 }

@@ -9,6 +9,7 @@ describe("AppStore trips", () => {
       id: "trip-1",
       ownerId: "bgm:1",
       title: "东京两日",
+      sourceTemplate: "tokyo-anime-highlights",
       shareToken: "sharetok",
       daysJson: JSON.stringify([{ day: 1, city: "东京", subjectIds: [1, 2] }]),
       subjectIdsJson: JSON.stringify([1, 2]),
@@ -18,6 +19,7 @@ describe("AppStore trips", () => {
 
     expect(store.listTrips("bgm:1")).toHaveLength(1);
     expect(store.getTripByShareToken("sharetok")?.title).toBe("东京两日");
+    expect(store.getTrip("trip-1")?.sourceTemplate).toBe("tokyo-anime-highlights");
 
     const ok = store.updateTrip("trip-1", {
       title: "京都一日",

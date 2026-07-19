@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { exchangeCode, fetchBangumiMe, getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { openAppStore } from "@/lib/db";
-import { OAUTH_STATE_COOKIE, parseOAuthState } from "@/lib/oauth-state";
+import { normalizeReturnPath, OAUTH_STATE_COOKIE, parseOAuthState } from "@/lib/oauth-state";
 import { absoluteUrl } from "@/lib/request-origin";
 import {
   COOKIE_NAME,
@@ -124,7 +124,8 @@ export async function GET(request: Request) {
       tokenExpiresAt,
     });
 
-    const destination = isLocale(payload.l) ? localePath(payload.l, "/library") : "/library";
+    const destination = normalizeReturnPath(payload.p)
+      ?? (isLocale(payload.l) ? localePath(payload.l, "/library") : "/library");
     const res = NextResponse.redirect(absoluteUrl(request, destination));
     const opts = sessionCookieOptions();
     // Overwrites the temporary OAuth state value in `__session`.

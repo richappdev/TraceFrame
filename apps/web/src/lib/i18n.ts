@@ -168,6 +168,10 @@ export const copy = {
       p2: "Anitabi 内容标注为 CC BY-NC-SA 4.0；Bangumi 条目数据按其 API 规则使用。在取得书面商业授权或建立自有合法 POI 数据前，AniPins 不启用付费规划、联盟营销或商业数据导出。",
       p3: "Presence 刷新使用人工确认的候选集合。遇到 Cloudflare 403/挑战会立即停止，不轮换出口继续枚举。",
     },
+    siteBlocked: {
+      title: "站点优化中",
+      body: "AniPins 正在优化体验，很快就会回来。请稍后再访问。",
+    },
   },
   "zh-TW": {
     site: {
@@ -191,6 +195,10 @@ export const copy = {
     access: { title: "需要存取權限", body: "此行程只有擁有者能編輯。若你有分享連結，請開啟唯讀分享頁。", open: "開啟分享頁", login: "登入" },
     privacy: { title: "隱私與帳戶資料", p1: "AniPins 會儲存 Bangumi 使用者識別碼、加密的 OAuth token、收藏條目與你建立的行程。瀏覽器只會收到 httpOnly 工作階段 cookie；服務不會將 OAuth token 寫入 localStorage。", p2: "公開分享頁只顯示行程中繼資料與 Anitabi 連結。更換或撤銷分享連結後，舊連結會立即失效。", p3: "你可以刪除帳戶、同步收藏與所有行程。刪除後無法復原，並會同時登出。", confirm: "輸入 DELETE 以確認永久刪除", delete: "永久刪除我的所有資料", login: "登入後可在此刪除帳戶資料。" },
     policyPage: { title: "資料與授權政策", p1: "目前 MVP 只儲存作品級 Presence 中繼資料與 Anitabi 地圖連結，不儲存或轉售 Anitabi 的 POI 明細、聖地巡禮截圖或離線資料包。", p2: "Anitabi 內容標示為 CC BY-NC-SA 4.0；Bangumi 條目資料依其 API 規則使用。在取得書面商業授權或建立自有合法 POI 資料前，AniPins 不啟用付費規劃、聯盟行銷或商業資料匯出。", p3: "Presence 更新使用人工確認的候選集合。遇到 Cloudflare 403 或驗證挑戰時會立即停止，不會輪換出口繼續列舉。" },
+    siteBlocked: {
+      title: "網站優化中",
+      body: "AniPins 正在優化體驗，很快就會回來。請稍後再造訪。",
+    },
   },
   "ja-JP": {
     site: { title: "AniPins — アニメ聖地巡礼プランナー", description: "BangumiのコレクションからAnitabiの聖地巡礼マップを見つけ、1〜3日間の旅程を作成します。", home: "AniPins ホーム", tagline: "聖地巡礼手帖", nav: "メインナビゲーション", discover: "見つける", library: "コレクション", trips: "旅程", policy: "データポリシー", plan: "ルートを作る", footer: "好きな物語を、現実の旅へ。", privacy: "プライバシーとデータ削除", license: "データとライセンス", contact: "お問い合わせ", language: "言語" },
@@ -205,6 +213,10 @@ export const copy = {
     access: { title: "アクセス権が必要です", body: "この旅程を編集できるのは所有者だけです。共有リンクをお持ちの場合は、閲覧専用ページを開いてください。", open: "共有ページを開く", login: "ログイン" },
     privacy: { title: "プライバシーとアカウントデータ", p1: "AniPinsはBangumiのユーザー識別子、暗号化したOAuth token、コレクション項目、作成した旅程を保存します。ブラウザにはhttpOnlyセッションcookieのみを送信し、OAuth tokenをlocalStorageへ保存しません。", p2: "公開共有ページには旅程のメタデータとAnitabiリンクだけを表示します。共有リンクを変更または解除すると、以前のリンクは直ちに無効になります。", p3: "アカウント、同期したコレクション、すべての旅程を削除できます。削除は取り消せず、同時にログアウトします。", confirm: "完全に削除するにはDELETEと入力してください", delete: "自分のデータをすべて削除", login: "ログインすると、ここでアカウントデータを削除できます。" },
     policyPage: { title: "データとライセンス", p1: "現在のMVPは作品単位のPresenceメタデータとAnitabiマップへのリンクだけを保存します。AnitabiのPOI詳細、聖地巡礼画像、オフラインデータを保存または再販売しません。", p2: "AnitabiのコンテンツはCC BY-NC-SA 4.0として表示され、Bangumiの作品データはAPIルールに従って利用します。書面による商用許諾を得るか、適法な独自POIデータを構築するまで、有料プラン、アフィリエイト、商用データ出力は提供しません。", p3: "Presenceの更新には人が確認した候補だけを使用します。Cloudflare 403やチャレンジが発生した場合は直ちに停止し、接続元を切り替えて列挙を続けません。" },
+    siteBlocked: {
+      title: "メンテナンス中",
+      body: "AniPinsは現在最適化のため調整しています。まもなく再開しますので、しばらくしてから再度アクセスしてください。",
+    },
   },
 } as const;
 

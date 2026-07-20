@@ -3,8 +3,11 @@ import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Source_Sans_3, Syne } from "next/font/google";
 import { AnalyticsConsent } from "@/components/AnalyticsConsent";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SiteAccessWatcher } from "@/components/SiteAccessWatcher";
+import { SiteBlockedPage } from "@/components/SiteBlockedPage";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { isSiteAccessBlocked } from "@/lib/site-access";
 import "./globals.css";
 
 const fontDisplay = Syne({
@@ -30,10 +33,18 @@ const fontMono = IBM_Plex_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  const c = getCopy(locale).site;
+  const blocked = await isSiteAccessBlocked();
+  const c = getCopy(locale);
+  if (blocked) {
+    return {
+      title: c.siteBlocked.title,
+      description: c.siteBlocked.body,
+      robots: { index: false, follow: false },
+    };
+  }
   return {
-    title: { default: c.title, template: `%s · AniPins` },
-    description: c.description,
+    title: { default: c.site.title, template: `%s · AniPins` },
+    description: c.site.description,
     alternates: {
       languages: {
         "zh-CN": localePath("zh-CN"),
@@ -47,8 +58,23 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   const c = getCopy(locale).site;
+  const blocked = await isSiteAccessBlocked();
+  const fontClass = `${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`;
+
+  if (blocked) {
+    return (
+      <html lang={locale} className={fontClass}>
+        <body>
+          <div className="shell shell-blocked">
+            <SiteBlockedPage locale={locale} />
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
-    <html lang={locale} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`}>
+    <html lang={locale} className={fontClass}>
       <body>
         <div className="shell">
           <header className="topbar">
@@ -91,6 +117,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </div>
           </footer>
           <AnalyticsConsent locale={locale} />
+          <SiteAccessWatcher />
         </div>
       </body>
     </html>

@@ -82,6 +82,7 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 - **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md). Operator smoke checklist: [`docs/hosted-smoke.md`](docs/hosted-smoke.md).
 - **Firebase** — project `antiable-anipin` (product display name: AniPin / AniPins); Firebase Hosting fronts Cloud Run in `asia-east1`
 - **Canonical app/OAuth host** — `https://antiable-anipin.web.app`
+- **Site access gate** — Firebase Remote Config **Server** parameter `site_access_blocked` (boolean). When `true`, the root AppShell shows only the optimization notice (no TopBar or routes). Fail-open if Remote Config is unreachable; in-process cache ~10s. Open tabs poll `/api/site-access` on the same interval (and on window focus) and reload when blocked. `/api/health` and other APIs are not gated by the AppShell (the poll endpoint is intentionally available). Console: [Remote Config → Server](https://console.firebase.google.com/project/antiable-anipin/config) → add/publish `site_access_blocked`.
 - **Production data** — Firestore for users, libraries, trips, and runtime Presence; local SQLite is development / rebuildable seed only.
 - **Automated preflight** — unit tests plus lint, workspace typecheck, and production build; hosted manual acceptance remains open.
 - **E4+** — blocked until M2 passes and rights/data gates are approved.

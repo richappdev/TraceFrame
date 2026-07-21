@@ -7,6 +7,8 @@ import { SiteAccessWatcher } from "@/components/SiteAccessWatcher";
 import { SiteBlockedPage } from "@/components/SiteBlockedPage";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 import { isSiteAccessBlocked } from "@/lib/site-access";
 import "./globals.css";
 
@@ -37,21 +39,25 @@ export async function generateMetadata(): Promise<Metadata> {
   const c = getCopy(locale);
   if (blocked) {
     return {
+      metadataBase: new URL(SITE_URL),
       title: c.siteBlocked.title,
       description: c.siteBlocked.body,
       robots: { index: false, follow: false },
     };
   }
-  return {
-    title: { default: c.site.title, template: `%s · AniPins` },
+  const page = buildPageMetadata({
+    locale,
+    path: "/",
+    title: c.site.title,
     description: c.site.description,
-    alternates: {
-      languages: {
-        "zh-CN": localePath("zh-CN"),
-        "zh-TW": localePath("zh-TW"),
-        "ja-JP": localePath("ja-JP"),
-      },
-    },
+    absoluteTitle: true,
+  });
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: "AniPins",
+    ...page,
+    // Keep template for child routes; home uses the absolute site title from buildPageMetadata.
+    title: { default: c.site.title, template: `%s · AniPins` },
   };
 }
 

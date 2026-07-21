@@ -4,6 +4,7 @@ import { curatedCopy, curatedTrips, curatedTripSubjectIds } from "@/lib/curated-
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
 import { openPresenceStore } from "@/lib/presence";
+import { websiteJsonLd } from "@/lib/seo";
 
 export default async function HomePage({
   searchParams,
@@ -48,9 +49,14 @@ export default async function HomePage({
     exchange_failed: "Bangumi 暂时无法完成登录，请再试一次。", profile_failed: "已授权登录，但暂时无法读取 Bangumi 账号资料。", storage_failed: "已授权登录，但目前无法保存账号资料。", session_failed: "无法建立登录会话。", bad_state: "登录验证已过期或无效，请重新登录。", missing_code: "Bangumi 没有返回授权码。", not_configured: "Bangumi 登录尚未完成设置。", error: "Bangumi 已取消或拒绝这次登录。",
   };
   const authError = auth ? authErrors[auth] : undefined;
+  const jsonLd = websiteJsonLd(locale);
 
   return (
     <div className="landing">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {authError ? (
         <aside className="auth-error" role="alert">
           <span>{authError}</span>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnalyticsEvent, AnalyticsLink } from "@/components/AnalyticsEvent";
@@ -9,8 +10,36 @@ import {
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
 import { openPresenceStore, presenceToPublic } from "@/lib/presence";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const trip = getCuratedTrip(slug);
+  const locale = await getLocale();
+  if (!trip) {
+    return buildPageMetadata({
+      locale,
+      path: `/trips/explore/${slug}`,
+      title: "Not found",
+      description: "",
+      noIndex: true,
+    });
+  }
+  return buildPageMetadata({
+    locale,
+    path: `/trips/explore/${trip.slug}`,
+    title: trip.title[locale],
+    description: trip.description[locale],
+    image: trip.coverUrl,
+    imageAlt: trip.featuredWorks[locale],
+  });
+}
 
 export default async function CuratedTripPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

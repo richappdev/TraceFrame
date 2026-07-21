@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
@@ -5,8 +6,20 @@ import { openAppStore } from "@/lib/db";
 import { parseSubjectIds, parseTripDays } from "@/lib/trips";
 import { formatDateTime, getCopy, localePath, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).trips;
+  return buildPageMetadata({
+    locale,
+    path: "/trips",
+    title: c.title,
+    description: c.loginIntro,
+  });
+}
 
 export default async function TripsPage() {
   const session = await getSession();

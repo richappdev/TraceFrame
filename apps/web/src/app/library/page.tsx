@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { anitabiMapUrl } from "@antiable/anitabi";
 import Link from "next/link";
 import { AnalyticsLink } from "@/components/AnalyticsEvent";
@@ -9,8 +10,20 @@ import { libraryMapState, openPresenceVerifyBackend } from "@/lib/presence-verif
 import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { collectionLabel, getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).library;
+  return buildPageMetadata({
+    locale,
+    path: "/library",
+    title: c.title,
+    description: c.loginIntro,
+  });
+}
 
 export default async function LibraryPage({
   searchParams,

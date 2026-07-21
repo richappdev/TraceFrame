@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { TrackedTripForm } from "@/components/AnalyticsEvent";
 import { getSession } from "@/lib/auth";
@@ -7,8 +8,20 @@ import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).newTrip;
+  return buildPageMetadata({
+    locale,
+    path: "/trips/new",
+    title: c.title,
+    description: c.loginIntro,
+  });
+}
 
 export default async function NewTripPage({
   searchParams,

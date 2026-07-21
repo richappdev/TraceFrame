@@ -1,9 +1,22 @@
+import type { Metadata } from "next";
 import { CuratedTripCard } from "@/components/CuratedTripCard";
 import { curatedCopy, curatedTrips, curatedTripSubjectIds } from "@/lib/curated-trips";
 import { getLocale } from "@/lib/i18n-server";
 import { openPresenceStore } from "@/lib/presence";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const copy = curatedCopy(locale);
+  return buildPageMetadata({
+    locale,
+    path: "/trips/explore",
+    title: copy.galleryTitle,
+    description: copy.galleryIntro,
+  });
+}
 
 export default async function ExploreTripsPage() {
   const locale = await getLocale();

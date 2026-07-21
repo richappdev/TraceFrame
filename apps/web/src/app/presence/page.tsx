@@ -1,11 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AnalyticsLink } from "@/components/AnalyticsEvent";
 import { curatedCopy, curatedTripsForSubject } from "@/lib/curated-trips";
 import { openPresenceStore, presenceToPublic } from "@/lib/presence";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).presence;
+  return buildPageMetadata({
+    locale,
+    path: "/presence",
+    title: c.title,
+    description: c.intro,
+  });
+}
 
 export default async function PresencePage({
   searchParams,

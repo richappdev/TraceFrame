@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TripEditor } from "@/components/TripEditor";
@@ -6,8 +7,26 @@ import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const locale = await getLocale();
+  const c = getCopy(locale).editor;
+  return buildPageMetadata({
+    locale,
+    path: `/trips/${id}`,
+    title: c.title,
+    description: c.instruction,
+    noIndex: true,
+  });
+}
 
 export default async function TripDetailPage({
   params,

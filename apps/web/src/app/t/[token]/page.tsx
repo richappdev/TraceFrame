@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnalyticsEvent, AnalyticsLink } from "@/components/AnalyticsEvent";
@@ -5,8 +6,38 @@ import { openAppStore } from "@/lib/db";
 import { hydrateTrip } from "@/lib/trips";
 import { getCopy, localePath, localizedTitle, localizeCity } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const locale = await getLocale();
+  const c = getCopy(locale);
+  const store = openAppStore();
+  const trip = await store.getTripByShareToken(token);
+  await store.close();
+  if (!trip) {
+    return buildPageMetadata({
+      locale,
+      path: `/t/${token}`,
+      title: "Not found",
+      description: "",
+      noIndex: true,
+    });
+  }
+  return buildPageMetadata({
+    locale,
+    path: `/t/${token}`,
+    title: trip.title,
+    description: c.shared.readonly,
+    noIndex: true,
+  });
+}
 
 export default async function SharedTripPage({
   params,

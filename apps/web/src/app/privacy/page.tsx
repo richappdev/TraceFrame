@@ -1,6 +1,19 @@
+import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
+import { buildPageMetadata } from "@/lib/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const c = getCopy(locale).privacy;
+  return buildPageMetadata({
+    locale,
+    path: "/privacy",
+    title: c.title,
+    description: c.p1,
+  });
+}
 
 export default async function PrivacyPage() {
   const session = await getSession();

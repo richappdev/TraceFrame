@@ -44,7 +44,11 @@ export function middleware(request: NextRequest) {
     // preference — never clobber auth or OAuth CSRF payloads.
     if (!sessionValue || savedLocale) {
       response.cookies.set(SESSION_COOKIE_NAME, localePreferenceValue(routeLocale), localePreferenceCookieOptions());
-      response.headers.set("Cache-Control", "private");
+      // Locale is already encoded in the URL, so CDN can cache the rewritten HTML.
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600",
+      );
     }
     return response;
   }
@@ -63,5 +67,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|icon|apple-icon|opengraph-image|twitter-image).*)",
+  ],
 };

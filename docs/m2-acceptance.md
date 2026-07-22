@@ -56,7 +56,9 @@ For a short unauthenticated reachability pass first, use [`hosted-smoke.md`](hos
 
 ## 7. Quality and operations
 
-- [x] `npm run test` (46 tests), `npm run typecheck`, `npm run lint`, and `npm run build` pass locally on 2026-07-19.
+- [x] Historical full preflight: `npm run test` (46 tests), `npm run typecheck`, `npm run lint`, and `npm run build` passed locally on 2026-07-19.
+- [x] Current code checks: `npm run test` (**76 tests**), `npm run typecheck`, and `npm run lint` passed locally on 2026-07-22.
+- [ ] Re-certify the current production build outside the restricted audit environment. The 2026-07-22 attempt reached `next build` but could not download Google Fonts because outbound network access was blocked; this is not production build evidence.
 - [ ] Mobile widths, keyboard navigation, focus visibility, and labels are manually checked.
 - [ ] `/api/health` succeeds and identifies the release as `implemented-awaiting-acceptance` until this checklist passes.
 - [ ] Error logs do not contain OAuth tokens, session cookies, or personal collection payloads.

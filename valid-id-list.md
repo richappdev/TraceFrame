@@ -4,7 +4,7 @@ Living register of Bangumi subject IDs that returned **HTTP 200** from Anitabi�
 
 Machine-readable source of truth: [`valid-ids.csv`](./valid-ids.csv)
 
-> Current canonical inventory: **14 reconciled IDs**, verified 2026-07-18. The long table below is retained as a historical 2026-07-15 snapshot and must not be used as the current seed.
+> Current canonical inventory: **31 reconciled IDs**, verified 2026-07-20 (`sourceRun=reconcile-20260720`). The long table below is retained as a historical 2026-07-15 snapshot and must not be used as the current seed.
 
 ## Validity rule
 
@@ -70,7 +70,7 @@ foreach ($r in $found) {
 $byId.Values | Sort-Object { [int]$_.id } | Export-Csv .\valid-ids.csv -NoTypeInformation -Encoding UTF8
 ```
 
-## Current inventory
+## Historical inventory
 
 Historical snapshot (**15** pre-reconciliation rows, captured 2026-07-15; superseded by `valid-ids.csv`):
 
@@ -98,6 +98,8 @@ Historical snapshot (**15** pre-reconciliation rows, captured 2026-07-15; supers
 |---|---|---|
 | `probe-testing/20260715-112622` (Run A/B) | 0 (404s / CF 403s) | N/A |
 | `manual-update-20260715` (multi-node report) | **15** | Yes — replaced inventory |
+| `probe-testing/20260720-bounded` | **31 / 50** lite hits; 17 new ranked candidates | Yes — reconciled before merge |
+| `reconcile-20260720` | **31 input → 31 kept** | Yes — current canonical registry |
 
 ## Related
 

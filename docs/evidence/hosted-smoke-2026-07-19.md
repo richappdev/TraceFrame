@@ -1,5 +1,7 @@
 # Hosted smoke evidence — 2026-07-19
 
+> **Historical pre-rename, pre-fix evidence.** Preserve the host and results below as observed. This run was a partial pass with a locale-negotiation failure; the code fix was implemented afterward, but no tracked post-fix hosted recheck is recorded here.
+
 Canonical host probed: `https://antiable-traceframe.web.app`  
 Commit at probe time (repo HEAD): `661e8e3`  
 Tester: automated HTTP probe from a network that resolves `web.app`  

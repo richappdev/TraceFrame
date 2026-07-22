@@ -1,6 +1,6 @@
-# Antiable Trip
+# AniPins
 
-Online product name: **AniPins**.
+An **Antiable** product. Anitabi is the upstream pilgrimage-map integration, not the product name.
 
 Bangumi library → Anitabi presence → city-day pilgrimage planner.
 
@@ -47,6 +47,7 @@ in [`docs/analytics.md`](docs/analytics.md).
 | `/trips/:id` | Trip editor (reorder + save) + share link |
 | `/t/:token` | Read-only shared trip |
 | `/api/health` | Deploy smoke |
+| `/api/site-access` | Remote Config-backed maintenance/access gate state |
 | `/api/presence` | Paginated presence JSON |
 | `/api/me/library/sync` | Refresh Bangumi collections + enqueue unmatched for verify |
 | `/api/internal/presence-drain` | Scheduler drain (Bearer `PRESENCE_DRAIN_SECRET`) |
@@ -77,7 +78,7 @@ Persist presence **metadata** only. Do not redistribute Anitabi detail POI/scree
 ## Phase status
 
 - **E0–E3 implementation** — code complete; this is not a release claim.
-- **Presence inventory** — 14 reconciled CSV seeds as of 2026-07-18; runtime verify can add Firestore hits on top.
+- **Presence inventory** — 31 reconciled CSV seeds as of 2026-07-20; runtime verify can add Firestore hits on top without rewriting the offline seed.
 - **Runtime verify** — live (enqueue on sync + Cloud Scheduler `presence-drain`); Notion: [Presence verify](https://app.notion.com/p/3a2a4181b62881b9ac74fe4a91bbf7af).
 - **M2 release gate** — **OPEN**; see [`docs/m2-acceptance.md`](docs/m2-acceptance.md). Operator smoke checklist: [`docs/hosted-smoke.md`](docs/hosted-smoke.md).
 - **Firebase** — project `antiable-anipin` (product display name: AniPin / AniPins); Firebase Hosting fronts Cloud Run in `asia-east1`

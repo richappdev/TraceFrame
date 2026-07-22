@@ -8,10 +8,10 @@
 
 ## M0 evidence status
 
-- Canonical inventory: `valid-ids.csv`, 14 reconciled IDs as of 2026-07-18.
-- Reconciliation evidence: generated local artifact `reports/presence-reconcile-2026-07-18.json`; sanitized tracked summary and checksum: [`docs/evidence/m0-coverage-2026-07-19.md`](evidence/m0-coverage-2026-07-19.md).
+- Canonical inventory: `valid-ids.csv`, **31 reconciled IDs** as of 2026-07-20 (`sourceRun=reconcile-20260720`).
+- Reconciliation evidence: generated local artifact `reports/presence-reconcile-2026-07-20.json`; sanitized tracked summary: [`docs/evidence/m0-coverage-2026-07-20.md`](evidence/m0-coverage-2026-07-20.md).
 - The 2026-07-15 top-200 report used a superseded 15-ID seed and must not be treated as current validation.
-- Refreshed ranked overlap: **5 of Bangumi top 200 mapped (2.5%)**. Real collection-match distribution is still required.
+- Historical 2026-07-19 ranked overlap: **5 of Bangumi top 200 mapped (2.5%)**. It has not been recomputed for the 31-ID registry and must not be presented as the current overlap. Real collection-match distribution is still required.
 
 ## Beta hypotheses and thresholds
 

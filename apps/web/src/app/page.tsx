@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { CuratedTripCard } from "@/components/CuratedTripCard";
 import { curatedCopy, curatedTrips, curatedTripSubjectIds } from "@/lib/curated-trips";
+import { getSession } from "@/lib/auth";
+import { getBangumiOAuthConfig } from "@/lib/bangumi-oauth";
 import { getCopy, localePath } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n-server";
 import { openPresenceStore } from "@/lib/presence";
@@ -14,6 +16,14 @@ export default async function HomePage({
   const { auth } = await searchParams;
   const locale = await getLocale();
   const c = getCopy(locale);
+  const session = await getSession();
+  const { configured: oauthConfigured } = getBangumiOAuthConfig();
+  const collectionPlanPath = `${localePath(locale, "/library")}?plan=1`;
+  const collectionPlanHref = session?.user
+    ? collectionPlanPath
+    : oauthConfigured
+      ? `/api/auth/bangumi?locale=${locale}&next=${encodeURIComponent(collectionPlanPath)}`
+      : localePath(locale, "/trips/new");
   const curated = curatedCopy(locale);
   const featuredTrips = curatedTrips.slice(0, 3);
   const presence = await openPresenceStore();
@@ -86,13 +96,14 @@ export default async function HomePage({
             {c.home.lede}
           </p>
           <div className="cta-row hero-actions">
-            <Link className="btn btn-primary" href={localePath(locale, "/trips/new")}>
+            <Link className="btn btn-primary" href={collectionPlanHref}>
               {c.home.start} <span aria-hidden="true">→</span>
             </Link>
             <Link className="btn btn-quiet" href={localePath(locale, "/presence")}>
               {c.home.browse}
             </Link>
           </div>
+          <p className="hero-action-helper">{c.home.planHelper}</p>
         </div>
 
         <div className="route-board" aria-label={c.home.example}>

@@ -30,8 +30,16 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const segments = url.pathname.split("/").filter(Boolean);
   const routeLocale = segments[0];
+  const rewriteLocale = request.headers.get("x-anipins-locale");
   const sessionValue = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const savedLocale = localeFromSessionCookie(sessionValue);
+
+  // Next dev may run middleware again for the internal destination of a
+  // locale-prefixed rewrite. Preserve that internal request instead of
+  // redirecting it back to the public locale URL and creating a loop.
+  if (isLocale(rewriteLocale) && !isLocale(routeLocale) && isPagePath(url.pathname)) {
+    return NextResponse.next();
+  }
 
   if (isLocale(routeLocale)) {
     const publicPath = `/${segments.slice(1).join("/")}` || "/";

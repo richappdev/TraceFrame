@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Source_Sans_3, Syne } from "next/font/google";
 import { AnalyticsConsent } from "@/components/AnalyticsConsent";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { PrimaryNavigation } from "@/components/PrimaryNavigation";
 import { SiteAccessWatcher } from "@/components/SiteAccessWatcher";
 import { SiteBlockedPage } from "@/components/SiteBlockedPage";
 import { getCopy, localePath } from "@/lib/i18n";
@@ -66,6 +67,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const c = getCopy(locale).site;
   const blocked = await isSiteAccessBlocked();
   const fontClass = `${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`;
+  const navigationItems = [
+    { href: localePath(locale, "/presence"), label: c.discover },
+    { href: localePath(locale, "/library"), label: c.library },
+    { href: localePath(locale, "/trips"), label: c.trips },
+  ];
 
   if (blocked) {
     return (
@@ -89,15 +95,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <span className="brand-mark" aria-hidden="true"><i /></span>
                 <span>ANIPINS<small>{c.tagline}</small></span>
               </a>
-              <nav className="nav" aria-label={c.nav}>
-                <a href={localePath(locale, "/presence")}>{c.discover}</a>
-                <a href={localePath(locale, "/library")}>{c.library}</a>
-                <a href={localePath(locale, "/trips")}>{c.trips}</a>
-                <a href={localePath(locale, "/data-policy")}>{c.policy}</a>
-              </nav>
+              <PrimaryNavigation
+                ariaLabel={c.nav}
+                className="nav-desktop"
+                items={navigationItems}
+              />
               <a className="nav-cta" href={localePath(locale, "/trips/new")}>{c.plan} <span aria-hidden="true">↗</span></a>
             </div>
           </header>
+          <PrimaryNavigation
+            ariaLabel={c.nav}
+            className="nav-mobile"
+            items={navigationItems}
+          />
           <main>{children}</main>
           <footer className="site-footer">
             <div className="footer-inner">

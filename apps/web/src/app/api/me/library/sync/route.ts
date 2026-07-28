@@ -5,6 +5,7 @@ import { openAppStore } from "@/lib/db";
 import { openPresenceStore } from "@/lib/presence";
 import { enqueueUnmatchedForVerify, openPresenceVerifyBackend } from "@/lib/presence-verify";
 import { absoluteUrl, isTrustedMutationOrigin } from "@/lib/request-origin";
+import { normalizeReturnPath } from "@/lib/oauth-state";
 
 export const runtime = "nodejs";
 
@@ -57,6 +58,16 @@ export async function POST(request: Request) {
     contentType.includes("application/x-www-form-urlencoded") ||
     contentType.includes("multipart/form-data") ||
     (request.headers.get("accept") ?? "").includes("text/html");
+  let returnPath: string | undefined;
+  if (wantsHtml) {
+    try {
+      const form = await request.formData();
+      const next = form.get("next");
+      returnPath = normalizeReturnPath(typeof next === "string" ? next : undefined);
+    } catch {
+      returnPath = undefined;
+    }
+  }
 
   try {
     const result = await syncLibrary();
@@ -67,7 +78,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     if (wantsHtml) {
-      return NextResponse.redirect(absoluteUrl(request, "/library?synced=1"), 303);
+      return NextResponse.redirect(absoluteUrl(request, returnPath ?? "/library?synced=1"), 303);
     }
     return NextResponse.json({
       ok: true,

@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mapped?: string }>;
+  searchParams: Promise<{ mapped?: string; plan?: string }>;
 }) {
   const session = await getSession();
   const locale = await getLocale();
@@ -36,6 +36,7 @@ export default async function LibraryPage({
   const { configured } = getBangumiOAuthConfig();
   const params = await searchParams;
   const mappedOnly = params.mapped === "1";
+  const planningMode = params.plan === "1";
 
   if (!session?.user) {
     return (
@@ -44,7 +45,10 @@ export default async function LibraryPage({
         <p>{c.library.loginIntro}</p>
         <div className="cta-row">
           {configured ? (
-            <a className="btn btn-primary" href={`/api/auth/bangumi?locale=${locale}`}>
+            <a
+              className="btn btn-primary"
+              href={`/api/auth/bangumi?locale=${locale}${planningMode ? `&next=${encodeURIComponent(`${localePath(locale, "/library")}?plan=1`)}` : ""}`}
+            >
               {c.common.login}
             </a>
           ) : (
@@ -100,6 +104,7 @@ export default async function LibraryPage({
     <section>
       <LibraryRefreshWhileChecking enabled={checkingCount > 0} />
       <div className="hero" style={{ marginBottom: "1.5rem" }}>
+        {planningMode ? <p className="eyebrow">{c.library.planStep}</p> : null}
         <h1>{session.user.nickname || session.user.username}{c.library.possessive}</h1>
         <p>
           {joined.length} {c.common.works} · {c.common.mapped} {mappedCount}
@@ -108,6 +113,9 @@ export default async function LibraryPage({
         </p>
         <div className="cta-row">
           <form action="/api/me/library/sync" method="post">
+            {planningMode ? (
+              <input type="hidden" name="next" value={localePath(locale, "/trips/new")} />
+            ) : null}
             <button className="btn btn-primary" type="submit">
               {c.library.sync}
             </button>
@@ -116,7 +124,7 @@ export default async function LibraryPage({
             {mappedOnly ? c.library.showAll : c.library.mappedOnly}
           </Link>
           <Link className="btn btn-primary" href={localePath(locale, "/trips/new")}>
-            {c.library.plan}
+            {planningMode ? c.library.continuePlan : c.library.plan}
           </Link>
           <Link className="btn" href={localePath(locale, "/trips")}>
             {c.library.myTrips}
@@ -125,6 +133,7 @@ export default async function LibraryPage({
             {c.library.logout}
           </a>
         </div>
+        {planningMode ? <p className="planning-helper">{c.library.syncThenPlan}</p> : null}
       </div>
 
       {view.length === 0 ? (

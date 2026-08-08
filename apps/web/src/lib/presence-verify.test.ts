@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PresenceStore } from "@antiable/presence";
 import { MemoryPresenceVerifyBackend } from "./memory-presence-verify";
 import {
@@ -84,6 +84,12 @@ describe("enqueueUnmatchedForVerify", () => {
 describe("drainPresenceQueue", () => {
   beforeEach(() => {
     resetMemoryPresenceVerifyBackend();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-19T12:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("upserts on lite hit and writes negative on 404", async () => {

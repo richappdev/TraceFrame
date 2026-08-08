@@ -60,12 +60,15 @@ async function main() {
   // 1) Health
   const healthRes = await page.request.get(`${BASE}/api/health`);
   const health = await healthRes.json();
-  step("api_health", healthRes.ok() && health.ok === true && health.service === "anipins", {
-    note: JSON.stringify(health),
-  });
-  if (health.phase !== "E3" && health.phase !== "E4") {
-    report.bugs.push({ type: "unexpected_phase", phase: health.phase });
-  }
+  step(
+    "api_health",
+    healthRes.ok() &&
+      health.ok === true &&
+      health.service === "anipins" &&
+      health.appStore === "firestore" &&
+      health.dependencies?.appStore === "ready",
+    { note: JSON.stringify(health) },
+  );
 
   // 2) Homepage brand + URL
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
